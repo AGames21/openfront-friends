@@ -120,7 +120,7 @@ export class PlayPage extends LitElement {
           ></streaming-now>
         </div>
 
-        ${process.env.FRIENDS_STATIC === "true" ? "" : html`<game-mode-selector></game-mode-selector>`}
+        <game-mode-selector></game-mode-selector>
 
         <!-- Desktop gets the compact footer button instead. -->
         <steam-wishlist

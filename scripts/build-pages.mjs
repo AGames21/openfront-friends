@@ -50,7 +50,7 @@ const html = ejs.render(template, {
   desktopLogoImageUrl: asset("images/OpenFront.png"),
   mobileLogoImageUrl: asset("images/OF.png"),
 });
-const style = `<style>news-box,streaming-now,steam-wishlist,featured-stream,homepage-promos,marketing-consent-toast,purchase-nudge-modal,nav-account-menu{display:none!important}</style>`;
+const style = `<style>game-mode-selector,news-box,streaming-now,steam-wishlist,featured-stream,homepage-promos,marketing-consent-toast,purchase-nudge-modal,nav-account-menu{display:none!important}</style>`;
 // No ad/analytics SDK is needed for the self-contained Pages edition.
 const clean = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, (script) =>
   /__loadThirdPartyScript\s*\(|googletagmanager\.com|adsbygoogle/.test(

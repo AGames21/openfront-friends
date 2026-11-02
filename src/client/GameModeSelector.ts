@@ -550,6 +550,7 @@ export class GameModeSelector extends LitElement {
    * snapshot and re-primes the list from the server.
    */
   public start() {
+    if (process.env.FRIENDS_STATIC === "true") return;
     this.openLobbyFeed();
   }
 
