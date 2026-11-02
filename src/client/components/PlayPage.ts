@@ -2,6 +2,7 @@ import { assetUrl } from "@openfront/shared/AssetUrls";
 import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import "./CosmeticBackground";
+import "./FriendsWelcome";
 import "./NavAccountMenu";
 import "./NavUtilityIcons";
 import "./NewsBox";
@@ -20,6 +21,7 @@ export class PlayPage extends LitElement {
         id="page-play"
         class="flex flex-col gap-2 w-full px-0 lg:px-4 min-h-0"
       >
+        <friends-welcome></friends-welcome>
         <token-login class="absolute"></token-login>
         <rewards-modal class="absolute"></rewards-modal>
 

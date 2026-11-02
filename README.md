@@ -1,3 +1,9 @@
+# OpenFront Friends
+
+Private multiplayer fork. **[Start here: play with friends](PLAY-WITH-FRIENDS.md)**
+
+---
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="proprietary/images/OpenFrontLogoDark.svg">
