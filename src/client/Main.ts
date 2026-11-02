@@ -269,6 +269,8 @@ declare global {
 }
 
 export interface JoinLobbyEvent {
+  friendsSession?: import("./FriendsRelay").FriendsSession;
+  friendsPlayerName?: string;
   // Multiplayer games only have gameID, gameConfig is not known until game starts.
   gameID: string;
   // GameConfig only exists when playing a singleplayer game.
@@ -1872,10 +1874,12 @@ class Client {
     // local game (offline on Steam it waits out the 5s ticket timeout):
     // read the cached JWT and refresh in the background instead.
     const isSingleplayer = lobby.source === "singleplayer";
-    if (isSingleplayer) {
+    if (isSingleplayer && !lobby.friendsPlayerName) {
       void userAuth();
     }
-    const auth = await userAuth(!isSingleplayer);
+    const auth = lobby.friendsPlayerName
+      ? false
+      : await userAuth(!isSingleplayer);
     const playerRole = auth !== false ? (auth.claims.role ?? null) : null;
     // Ensure the one-shot Steam name-seed has settled before reading
     // getUsername(), mirroring how getClanCheck() runs in parallel with the
@@ -1922,11 +1926,14 @@ class Client {
     }
     const newLobbyHandle = joinLobby(this.eventBus, {
       gameID: lobby.gameID,
+      friendsSession: lobby.friendsSession,
       cosmetics: await getPlayerCosmeticsRefs({
         verified: resolvedName.verified,
       }),
-      turnstileToken: await this.getTurnstileToken(lobby),
-      playerName: resolvedName.name,
+      turnstileToken: lobby.friendsPlayerName
+        ? null
+        : await this.getTurnstileToken(lobby),
+      playerName: lobby.friendsPlayerName ?? resolvedName.name,
       playerClanTag: this.usernameInput?.getClanTag() ?? null,
       clanTagCheck: this.usernameInput?.getClanCheck(),
       playerRole,

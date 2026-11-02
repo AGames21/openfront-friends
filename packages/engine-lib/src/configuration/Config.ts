@@ -372,7 +372,7 @@ export class Config {
       case Difficulty.Easy:
         return maxTroops * 0.5;
       case Difficulty.Medium:
-        return maxTroops * 0.75;
+        return maxTroops * 0.65;
       case Difficulty.Hard:
         return maxTroops * 1; // Like humans
       case Difficulty.Impossible:
@@ -400,7 +400,7 @@ export class Config {
           toAdd *= 0.9;
           break;
         case Difficulty.Medium:
-          toAdd *= 0.95;
+          toAdd *= 0.92;
           break;
         case Difficulty.Hard:
           toAdd *= 1; // Like humans

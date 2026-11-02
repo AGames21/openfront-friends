@@ -1,41 +1,24 @@
-# OpenFront Friends
+﻿# Play OpenFront Friends
 
-A self-hosted OpenFront fork with a private multiplayer entry screen and a LAN launcher. The complete upstream territory simulation, maps, buildings, alliances, bots, audio, controls, and multiplayer protocol are retained. This is an independent fork, not an official OpenFront service.
+Play at https://agames21.github.io/openfront-friends/ .
 
-## Start on Windows, macOS, or Linux
+## Online matchmaking
 
-Install Node.js 24.15+ (Node 24) and npm 12.1+ (npm 12), then run:
+1. Click **Multiplayer**.
+2. Sign in with Google, or create/sign in to an email and password account.
+3. Click **Find multiplayer match**. Keep the tab open.
+4. If another commander joins within 20 seconds, both players share the same world with AI nations. If nobody joins, the game clearly switches to **Normal AI**.
 
-```sh
-npm ci --ignore-scripts
-npm run friends
-```
+Online games currently support two humans plus AI, on the compact World map, with Normal difficulty and five-minute border protection. Queue cancellation is available. Your account stays signed in across reloads; use Sign out on a shared device. Password recovery is available in the account panel.
 
-If your Node installation bundles npm 11, use a local npm 12 without changing the global installation:
+Matches are casual and peer-hosted: the first player's browser orders turns and both browsers simulate them. Both peers must remain connected. A disconnected or out-of-sync match shows an explanation; return to the menu and search again. Rejoining a departed match, large public lobbies, ranked play, and dedicated-server anti-cheat are not implemented.
 
-```sh
-npx --yes --ignore-scripts npm@12.1.0 ci --ignore-scripts
-npm run friends
-```
+## Hosting and maintenance
 
-Open http://localhost:9000. Choose a name, click **Host a match**, choose the map and rules, and copy the lobby link. Friends open the same link using the LAN address printed by the launcher instead of `localhost`. Start after everyone appears in the roster. Each player needs a separate browser profile/device; two tabs in one profile share the same player identity.
+GitHub Pages hosts the game. Firebase project `ag-arcade-frontier` uses the free Spark plan for Authentication and Realtime Database; no billing account was linked. Provider settings and authorized domains are configured for AGames21.github.io. `src/client/FriendsFirebase.ts` contains only the public Firebase web configuration. OAuth authorization codes, refresh tokens, Google client secrets, and service-account credentials must never be committed.
 
-Allow Node through Windows Firewall on your **private network** if Windows asks. The host PC must stay running. This development launcher is for trusted LAN/private-VPN play; it uses upstream development guest identities and is not hardened for public Internet exposure. Do not forward its ports to the Internet.
+Database rules in `database.rules.json` require authentication, restrict room data to its members, reserve host turn writes for the host, and restrict inputs/acknowledgements to their owner. They are deployed with `firebase deploy --only database --project ag-arcade-frontier`. Quota exhaustion stops online service; solo remains available. No automatic paid upgrade is configured. Abandoned host sessions can leave room history behind; periodically remove old closed rooms in the Firebase console. Turn writes expire after two hours.
 
-## What works independently
+## Optional LAN server
 
-Private lobbies, bots, solo play, and the game simulation run locally. OpenFront's account login, paid cosmetics, ranked matchmaking, and cloud statistics require upstream services and are not provided by this fork. Some optional upstream widgets may log unavailable API requests to localhost:8787; these are separate from the local game server.
-
-GitHub stores the source; GitHub Pages cannot host this Node/WebSocket multiplayer server. Internet hosting needs a server, HTTPS/WebSockets, and an independently configured identity service. No public game host is provisioned by this setup.
-
-## Credits and source
-
-Based on https://github.com/openfrontio/OpenFrontIO. © OpenFront and Contributors. Code remains AGPL-3.0; resources remain under their supplied asset licenses. The complete upstream package and notices are preserved, including the separate terms in `proprietary/LICENSE`. No external premium assets were downloaded. See `LICENSE`, `LICENSE-ASSETS`, and `LICENSING.md`.
-
-This fork adds `FriendsWelcome.ts`, the `friends` launcher, and this guide. `README.md` retains upstream development documentation.
-
-## Hosted browser edition
-
-Play solo at https://agames21.github.io/openfront-friends/. GitHub Pages serves the client, maps, audio, and browser simulation. It cannot run the multiplayer Node/WebSocket server. Use the LAN launcher above for multiplayer. The Pages build hides unavailable multiplayer entry points.
-
-`npm run build:pages` creates the Pages artifact, and `.github/workflows/pages.yml` publishes main automatically.
+For the original full Node server and larger private lobbies, run `npm run friends` locally and share its LAN address with friends on the same network. The GitHub Pages multiplayer button uses Firebase matchmaking instead of this server.

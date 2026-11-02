@@ -1,0 +1,70 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "queue": {
+      "$version": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.hasChildren(['roomID','createdAt']) && newData.child('roomID').isString() && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now + 10000 && newData.child('createdAt').val() > now - 60000"
+        }
+      }
+    },
+    "rooms": {
+      "$room": {
+        ".read": "auth != null && (data.child('meta/host/uid').val() === auth.uid || data.child('guest/uid').val() === auth.uid)",
+        ".write": "auth != null && !newData.exists() && data.child('meta/host/uid').val() === auth.uid",
+        "meta": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists() && newData.child('host/uid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['host','createdAt']) && newData.child('createdAt').isNumber() && newData.child('createdAt').val() > now - 60000 && newData.child('createdAt').val() <= now + 10000",
+          "host": {
+            ".validate": "newData.hasChildren(['uid','clientID','name']) && newData.child('name').isString() && newData.child('name').val().length <= 20 && newData.child('clientID').isString() && newData.child('clientID').val().length <= 20"
+          }
+        },
+        "guest": {
+          ".read": "auth != null",
+          ".write": "auth != null && !data.exists() && root.child('rooms').child($room).child('meta/host/uid').exists() && root.child('rooms').child($room).child('meta/createdAt').val() > now - 30000 && ((newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('meta/host/uid').val() !== auth.uid) || (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid && newData.child('uid').val() === 'closed'))",
+          ".validate": "newData.hasChildren(['uid','clientID','name']) && newData.child('name').isString() && newData.child('name').val().length <= 20 && newData.child('clientID').isString() && newData.child('clientID').val().length <= 20"
+        },
+        "start": {
+          ".write": "auth != null && auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() && !data.exists() && root.child('rooms').child($room).child('guest/uid').val() !== 'closed' && root.child('rooms').child($room).child('guest/uid').exists()",
+          ".validate": "newData.isString() && newData.val().length < 20000"
+        },
+        "turns": {
+          "$turn": {
+            ".write": "auth != null && auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() && !data.exists() && root.child('rooms').child($room).child('meta/createdAt').val() > now - 7200000",
+            ".validate": "newData.isString() && newData.val().length < 65536"
+          }
+        },
+        "inputs": {
+          "$uid": {
+            "$input": {
+              ".write": "auth != null && auth.uid === $uid && (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid || root.child('rooms').child($room).child('guest/uid').val() === auth.uid) && !data.exists() && root.child('rooms').child($room).child('meta/createdAt').val() > now - 7200000",
+              ".validate": "newData.isString() && newData.val().length < 4096"
+            }
+          }
+        },
+        "acks": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid || root.child('rooms').child($room).child('guest/uid').val() === auth.uid)",
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+          }
+        },
+        "closed": {
+          ".write": "auth != null && (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid || root.child('rooms').child($room).child('guest/uid').val() === auth.uid)",
+          ".validate": "newData.val() === true"
+        },
+        "hashes": {
+          "$turn": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid || root.child('rooms').child($room).child('guest/uid').val() === auth.uid)",
+              ".validate": "newData.isNumber()"
+            }
+          }
+        }
+      }
+    }
+  }
+}

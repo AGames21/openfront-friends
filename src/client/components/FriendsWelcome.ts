@@ -74,6 +74,20 @@ export class FriendsWelcome extends LitElement {
           : "page-single-player",
     );
   }
+  private async online() {
+    await import("./FriendsOnline");
+    let panel =
+      document.querySelector<import("./FriendsOnline").FriendsOnline>(
+        "friends-online",
+      );
+    if (!panel) {
+      panel = document.createElement(
+        "friends-online",
+      ) as import("./FriendsOnline").FriendsOnline;
+      document.body.appendChild(panel);
+    }
+    panel.open();
+  }
   private choose(difficulty: Difficulty) {
     this.selected = difficulty;
     rememberSoloDifficulty(difficulty);
@@ -122,7 +136,7 @@ export class FriendsWelcome extends LitElement {
             >
               ${commandIcon("play")} PLAY SOLO ${commandIcon("arrow")}
             </button>
-            ${hosted ? html`<a class="command-secondary" href="https://github.com/AGames21/openfront-friends/blob/main/PLAY-WITH-FRIENDS.md">Multiplayer setup ${commandIcon("arrow")}</a>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
+            ${hosted ? html`<button class="command-secondary" @click=${this.online}>Multiplayer ${commandIcon("arrow")}</button>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
           </div>
         </div>
         <div class="command-globe" aria-hidden="true">
@@ -185,7 +199,7 @@ export class FriendsWelcome extends LitElement {
         <button class="command-soundtest" @click=${this.testSound}>
           ${commandIcon("sound")} Test launch sound</button
         ><span
-          >${hosted ? "Browser solo available · Online multiplayer needs a separate server" : "Private multiplayer ready · Invite friends using your LAN address"}</span
+          >${hosted ? "Online matchmaking · Google or email sign-in · Normal AI fallback" : "Private multiplayer ready · Invite friends using your LAN address"}</span
         >
       </div>
       <div class="command-credits">

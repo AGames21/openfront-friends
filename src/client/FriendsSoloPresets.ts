@@ -14,7 +14,7 @@ export const soloPresets = [
     name: "Normal",
     rank: "COMMANDER",
     icon: "flag",
-    description: "Balance your borders and your economy.",
+    description: "Balanced AI with gentler armies and reactions.",
     color: "#61baff",
   },
   {

@@ -50,6 +50,7 @@ import { getPlayToken } from "./Auth";
 import { LobbyConfig } from "./ClientGameRunner";
 import { clientDevice, clientPlatform } from "./ClientPlatform";
 import { isDesktopShell } from "./DesktopShell";
+import { FriendsRelay } from "./FriendsRelay";
 import { showInGameConfirm } from "./InGameModal";
 import {
   SendKickPlayerIntentEvent,
@@ -263,7 +264,7 @@ export class Transport {
 
   private socket: WebSocket | null = null;
 
-  private localServer: LocalServer;
+  private localServer: LocalServer | FriendsRelay;
 
   private buffer: ClientMessage[] = [];
 
@@ -303,6 +304,7 @@ export class Transport {
     // If gameRecord is not null, we are replaying an archived game.
     // For multiplayer games, GameConfig is not known until game starts.
     this.isLocal =
+      this.lobbyConfig.friendsSession !== undefined ||
       this.lobbyConfig.gameRecord !== undefined ||
       this.lobbyConfig.gameStartInfo?.config.gameType === GameType.Singleplayer;
 
@@ -440,11 +442,13 @@ export class Transport {
     onconnect: () => void,
     onmessage: (message: ServerMessage) => void,
   ) {
-    this.localServer = new LocalServer(
-      this.lobbyConfig,
-      this.lobbyConfig.gameRecord !== undefined,
-      this.eventBus,
-    );
+    this.localServer = this.lobbyConfig.friendsSession
+      ? new FriendsRelay(this.lobbyConfig)
+      : new LocalServer(
+          this.lobbyConfig,
+          this.lobbyConfig.gameRecord !== undefined,
+          this.eventBus,
+        );
     this.localServer.updateCallback(onconnect, onmessage);
     this.localServer.start();
   }

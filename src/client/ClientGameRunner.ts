@@ -102,6 +102,7 @@ import { WebGLFrameBuilder } from "./WebGLFrameBuilder";
 import { WorkerClient } from "./WorkerClient";
 
 export interface LobbyConfig {
+  friendsSession?: import("./FriendsRelay").FriendsSession;
   cosmetics: PlayerCosmeticRefs;
   playerName: string;
   playerClanTag: string | null;

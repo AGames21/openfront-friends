@@ -96,7 +96,7 @@ export class NationExecution implements Execution {
       case Difficulty.Easy:
         return this.random.nextInt(65, 100); // Slower reactions
       case Difficulty.Medium:
-        return this.random.nextInt(55, 70);
+        return this.random.nextInt(62, 80);
       case Difficulty.Hard:
         return this.random.nextInt(45, 60);
       case Difficulty.Impossible:

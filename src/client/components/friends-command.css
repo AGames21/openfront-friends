@@ -1123,3 +1123,97 @@ friends-world-status {
     animation: none;
   }
 }
+.friends-online-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #040b18dc;
+  backdrop-filter: blur(12px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow: auto;
+}
+.friends-online-panel {
+  width: min(540px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  color: #eaf0fa;
+  background: linear-gradient(145deg, #19273d, #0d1628);
+  border: 1px solid #52627e;
+  border-radius: 22px;
+  padding: 28px;
+  box-shadow: 0 25px 100px #0009;
+  font-family: system-ui, sans-serif;
+}
+.friends-online-panel h2 {
+  font-size: 30px;
+  margin: 5px 0 20px;
+}
+.friends-online-panel button {
+  padding: 11px 16px;
+  border: 1px solid #53647c;
+  border-radius: 10px;
+  background: #253750;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  margin: 4px;
+}
+.friends-online-panel button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.friends-online-panel .command-deploy {
+  width: 100%;
+  background: #ffbd50;
+  color: #131b2b;
+  margin: 12px 0;
+  justify-content: center;
+}
+.friends-online-panel label {
+  display: block;
+  margin: 16px 0;
+  font-weight: 650;
+}
+.friends-online-panel input {
+  display: block;
+  width: 100%;
+  padding: 13px;
+  margin-top: 7px;
+  border: 1px solid #53647c;
+  border-radius: 10px;
+  background: #0b1424;
+  color: #fff;
+}
+.friends-online-panel p {
+  line-height: 1.6;
+}
+.friends-online-panel small,
+.online-help {
+  color: #b5c3d9;
+}
+.online-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.friends-online-panel :focus-visible {
+  outline: 3px solid #ffbd50;
+  outline-offset: 3px;
+}
+.friends-online-notice {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: #15253b;
+  color: #ffcc76;
+  border: 1px solid #ce9950;
+  border-radius: 12px;
+  padding: 15px 22px;
+  box-shadow: 0 8px 35px #0008;
+  max-width: 90vw;
+  font-weight: 700;
+}

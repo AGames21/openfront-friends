@@ -1,4 +1,4 @@
-# Verification — November 1, 2026
+# Verification â€” November 1, 2026
 
 Upstream base: `103bba550d3a39ceb623179a04687719cf8a051b`.
 
@@ -17,3 +17,12 @@ Upstream base: `103bba550d3a39ceb623179a04687719cf8a051b`.
 - Added a dedicated Pages build with rendered bootstrap configuration, repository-relative bundle paths, and correctly prefixed map/audio/worker assets.
 - Pages edition offers browser solo play; the Node multiplayer launcher is retained separately. The hosted UI states that multiplayer requires a separate server.
 - Workflow `.github/workflows/pages.yml` publishes `static/` on main pushes.
+
+
+## 2026-11-02: accounts, matchmaking, and gentler Normal
+
+The new Pages multiplayer flow uses Firebase Authentication (email/password and Google) and Realtime Database on Spark. See PLAY-WITH-FRIENDS.md for current behavior and limits; it supersedes earlier static-only multiplayer notes. Normal nation army capacity is now 65% of the base (previously 75%), growth multiplier 0.92 (previously 0.95), and attack reactions 62-80 ticks (previously 55-70). Human stats and other difficulty levels are unchanged.
+
+Validation: full TypeScript workspace checks and Pages build passed; 77 relevant unit tests passed. The browser Normal playthrough verified all difficulty selections, audio playback/muting, protected start, world-control progress, bottom HUD, attack ratio, field guide, and mobile overflow. Two real Firebase test accounts joined from isolated browsers, both sent actions, and game hashes matched at turns 0 and 100. Simultaneous queue entry, cancellation, and a 20-second fallback to a real Singleplayer/Medium game passed. Rules rejected anonymous room reads and guest writes to host turns. Temporary accounts and test rooms were removed. Google provider verification and live deployment results are recorded below when complete.
+
+Google provider is enabled with a generated web OAuth client. A browser test opened the real Google sign-in page; completing a personal Google account sign-in was not automated. Live email account creation, sign-in, session persistence, simultaneous pairing, matching state hashes, cancellation and Normal AI fallback all passed. The relay allows a maximum three-turn pipeline to absorb network latency while preserving turn order.
