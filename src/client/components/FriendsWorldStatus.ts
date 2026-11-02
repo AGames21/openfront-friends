@@ -69,12 +69,15 @@ export class FriendsWorldStatus extends LitElement {
       rank,
       goal: config.percentageTilesOwnedToWinTenths(elapsed) / 10,
       protectedSeconds: config.hasExtendedSpawnImmunity()
-        ? Math.max(
-            0,
-            (config.numSpawnPhaseTurns() +
-              config.spawnImmunityDuration() -
-              game.ticks()) /
-              10,
+        ? Math.min(
+            config.spawnImmunityDuration() / 10,
+            Math.max(
+              0,
+              (config.numSpawnPhaseTurns() +
+                config.spawnImmunityDuration() -
+                game.ticks()) /
+                10,
+            ),
           )
         : 0,
       elapsed,
