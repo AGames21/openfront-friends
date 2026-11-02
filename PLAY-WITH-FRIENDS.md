@@ -36,6 +36,6 @@ This fork adds `FriendsWelcome.ts`, the `friends` launcher, and this guide. `REA
 
 ## Hosted browser edition
 
-Play solo at https://agames21.github.io/openfront-friends/. GitHub Pages serves the client, maps, audio, and browser simulation. It cannot run the multiplayer Node/WebSocket server. Use the LAN launcher above for multiplayer. The Pages build hides unavailable multiplayer entry points. 
-pm run build:pages creates the Pages artifact, and .github/workflows/pages.yml publishes main automatically.
+Play solo at https://agames21.github.io/openfront-friends/. GitHub Pages serves the client, maps, audio, and browser simulation. It cannot run the multiplayer Node/WebSocket server. Use the LAN launcher above for multiplayer. The Pages build hides unavailable multiplayer entry points.
 
+`npm run build:pages` creates the Pages artifact, and `.github/workflows/pages.yml` publishes main automatically.
