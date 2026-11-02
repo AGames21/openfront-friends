@@ -10,3 +10,10 @@ Upstream base: `103bba550d3a39ceb623179a04687719cf8a051b`.
 - Fixed an upstream browser compatibility issue: some Chrome versions expose `navigator.keyboard` without event-listener methods. Layout-change subscription now uses an optional method, with a regression test.
 - Installation reported 22 dependency advisories (11 moderate, 7 high, 4 critical). Dependencies are the unmodified upstream lockfile. No speculative automatic dependency upgrades were made.
 - Upstream CSS/chunk-size build warnings remain. Optional account/news widgets request an unavailable local API on port 8787; private game hosting does not require that service.
+
+
+## GitHub Pages ? November 2, 2026
+
+- Added a dedicated Pages build with rendered bootstrap configuration, repository-relative bundle paths, and correctly prefixed map/audio/worker assets.
+- Pages edition offers browser solo play; the Node multiplayer launcher is retained separately. The hosted UI states that multiplayer requires a separate server.
+- Workflow `.github/workflows/pages.yml` publishes `static/` on main pushes.

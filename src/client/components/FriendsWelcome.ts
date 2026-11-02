@@ -130,9 +130,8 @@ export class FriendsWelcome extends LitElement {
           }
         </div>
         <div class="friends-note">
-          Choose your name below. Friends on your Wi-Fi use this computer’s LAN
-          address on port 9000. <br />Independent OpenFront fork · © OpenFront
-          and Contributors ·
+          ${staticHosting ? "Hosted on GitHub Pages. Online multiplayer needs a separate game server; use the LAN edition from the source link to play with friends." : "Choose your name below. Friends on your Wi-Fi use this computer's LAN address on port 9000."}
+          <br />Independent OpenFront fork · © OpenFront and Contributors ·
           <a
             href="https://github.com/AGames21/openfront-friends"
             target="_blank"
