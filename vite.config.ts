@@ -405,7 +405,7 @@ export default defineConfig(({ mode }) => {
       ],
     },
     root: "./",
-    base: "/",
+    base: env.PAGES_BASE ?? "/",
     publicDir: isProduction ? false : "resources",
 
     // Vite's JS preload helper (`__vitePreload`, used by dynamic import())
@@ -464,6 +464,9 @@ export default defineConfig(({ mode }) => {
     ],
 
     define: {
+      "process.env.FRIENDS_STATIC": JSON.stringify(
+        env.FRIENDS_STATIC ?? "false",
+      ),
       __ASSET_MANIFEST__: JSON.stringify(assetManifest),
       "process.env.WEBSOCKET_URL": JSON.stringify(
         isProduction ? "" : "localhost:3000",

@@ -33,3 +33,9 @@ GitHub stores the source; GitHub Pages cannot host this Node/WebSocket multiplay
 Based on https://github.com/openfrontio/OpenFrontIO. © OpenFront and Contributors. Code remains AGPL-3.0; resources remain under their supplied asset licenses. The complete upstream package and notices are preserved, including the separate terms in `proprietary/LICENSE`. No external premium assets were downloaded. See `LICENSE`, `LICENSE-ASSETS`, and `LICENSING.md`.
 
 This fork adds `FriendsWelcome.ts`, the `friends` launcher, and this guide. `README.md` retains upstream development documentation.
+
+## Hosted browser edition
+
+Play solo at https://agames21.github.io/openfront-friends/. GitHub Pages serves the client, maps, audio, and browser simulation. It cannot run the multiplayer Node/WebSocket server. Use the LAN launcher above for multiplayer. The Pages build hides unavailable multiplayer entry points. 
+pm run build:pages creates the Pages artifact, and .github/workflows/pages.yml publishes main automatically.
+

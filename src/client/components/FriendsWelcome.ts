@@ -23,6 +23,7 @@ export class FriendsWelcome extends LitElement {
   }
 
   render() {
+    const staticHosting = process.env.FRIENDS_STATIC === "true";
     return html`
       <style>
         friends-welcome {
@@ -103,24 +104,30 @@ export class FriendsWelcome extends LitElement {
         aria-label="OpenFront Friends private multiplayer"
       >
         <div class="friends-eyebrow">
-          OPENFRONT FRIENDS / PRIVATE MULTIPLAYER
+          OPENFRONT FRIENDS /
+          ${staticHosting ? "BROWSER EDITION" : "PRIVATE MULTIPLAYER"}
         </div>
         <h1>Your friends. One world.</h1>
         <p>
-          Claim your territory, build an economy, and choose your allies. Host a
-          private match and share the lobby link. Everyone plays together on
-          your server.
+          Claim your territory, build an economy, and choose your allies.
+          ${staticHosting ? "Play a full solo match against bots, right in your browser." : "Host a private match and share the lobby link. Everyone plays together on your server."}
         </p>
         <div class="friends-actions">
-          <button @click=${() => this.open("host-lobby-modal")}>
-            Host a match →
-          </button>
-          <button @click=${() => this.open("join-lobby-modal")}>
-            Join friends
-          </button>
-          <button @click=${() => this.open("single-player-modal")}>
-            Practice solo
-          </button>
+          ${
+            staticHosting
+              ? html`<button @click=${() => this.open("single-player-modal")}>
+                  Play solo
+                </button>`
+              : html`<button @click=${() => this.open("host-lobby-modal")}>
+                    Host a match →
+                  </button>
+                  <button @click=${() => this.open("join-lobby-modal")}>
+                    Join friends
+                  </button>
+                  <button @click=${() => this.open("single-player-modal")}>
+                    Practice solo
+                  </button>`
+          }
         </div>
         <div class="friends-note">
           Choose your name below. Friends on your Wi-Fi use this computer’s LAN

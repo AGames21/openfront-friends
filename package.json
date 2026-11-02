@@ -45,7 +45,8 @@
     "gen-maps": "cd map-generator && go run -tags nodynamic . && npm run gen-map-schema",
     "gen-map-schema": "tsx scripts/genMapInfoSchema.ts && npx --no-install oxfmt --write map-generator/info.schema.json",
     "inst": "npm ci --ignore-scripts",
-    "friends": "node scripts/friends-start.mjs"
+    "friends": "node scripts/friends-start.mjs",
+    "build:pages": "node scripts/build-pages.mjs"
   },
   "lint-staged": {
     "**/*.{js,mjs,cjs,ts,jsx,tsx}": [
