@@ -519,6 +519,7 @@
 
     <!-- Bottom HUD: <sm=column, sm..lg=2col (HUD left | events right), lg+=3col grid centered -->
     <div
+      id="friends-bottom-hud"
       class="fixed bottom-0 left-0 w-full z-[200] flex flex-col pointer-events-none sm:flex-row sm:items-end lg:grid lg:grid-cols-[1fr_500px_1fr] lg:items-end min-[1200px]:px-4"
       style="
         padding-bottom: env(safe-area-inset-bottom);
@@ -528,6 +529,7 @@
     >
       <!-- HUD: <sm contents (children join outer flex), sm+ flex-col 460px, lg+ col-2 -->
       <div
+        id="friends-hud-stack"
         class="contents sm:flex sm:flex-col sm:pointer-events-none w-full sm:w-[500px] lg:col-start-2 sm:z-10"
       >
         <attacks-display
@@ -537,6 +539,7 @@
           class="hidden w-full order-3 sm:order-none"
         ></tutorial-panel>
         <div
+          id="friends-control-dock"
           class="pointer-events-auto bg-gray-800/92 backdrop-blur-sm sm:rounded-tr-lg lg:rounded-t-lg min-[1200px]:rounded-lg shadow-lg order-3 sm:order-none"
         >
           <control-panel class="w-full"></control-panel>

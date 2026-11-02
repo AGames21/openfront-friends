@@ -21,15 +21,19 @@ import { responseHasLinkedIdentity } from "./AccountIdentity";
 import "./components/baseComponents/Button";
 import "./components/baseComponents/Modal";
 import { BaseModal } from "./components/BaseModal";
-import "./components/GameConfigSettings";
 import { MEDAL_ORDER, medalIcon } from "./components/map/Medals";
+import "./components/GameConfigSettings";
 import {
   type LoadSavedGameDetail,
   savedGameIdFrom,
 } from "./components/SavedGamesPanel";
-import "./components/ToggleInputCard";
 import { modalHeader } from "./components/ui/ModalHeader";
+import "./components/ToggleInputCard";
 import { getPlayerCosmetics, prewarmCosmetics } from "./Cosmetics";
+import {
+  preferredSoloDifficulty,
+  rememberSoloDifficulty,
+} from "./FriendsSoloPresets";
 import { gamePortal } from "./GamePortal";
 import { GameStartingModal } from "./GameStartingModal";
 import { showInGameAlert } from "./InGameModal";
@@ -191,6 +195,7 @@ async function loadAchievementEligibleMaps(): Promise<Set<GameMapType> | null> {
 export class SinglePlayerModal extends BaseModal {
   protected routerName = "single-player";
 
+  @state() private protectedStart = true;
   @state() private selectedMap: GameMapType = DEFAULT_OPTIONS.selectedMap;
   @state() private selectedDifficulty: Difficulty =
     DEFAULT_OPTIONS.selectedDifficulty;
@@ -526,6 +531,20 @@ export class SinglePlayerModal extends BaseModal {
             @open-shared-save=${(e: CustomEvent<string>) =>
               (this.sharedSaveId = e.detail)}
           ></saved-games-panel>
+          <label class="friends-protection-option"
+            ><input
+              type="checkbox"
+              .checked=${this.protectedStart}
+              @change=${(e: Event) => {
+                this.protectedStart = (e.target as HTMLInputElement).checked;
+              }}
+            /><span
+              >Five-minute border protection<small
+                >Build up before the fighting starts. Turn off for immediate
+                combat.</small
+              ></span
+            ></label
+          >
           <game-config-settings
             class="block"
             .sectionGapClass=${"space-y-6"}
@@ -764,7 +783,7 @@ export class SinglePlayerModal extends BaseModal {
     // left the previous attempt in flight.
     this.starting = false;
     this.selectedMap = DEFAULT_OPTIONS.selectedMap;
-    this.selectedDifficulty = DEFAULT_OPTIONS.selectedDifficulty;
+    this.selectedDifficulty = preferredSoloDifficulty();
     this.gameMode = DEFAULT_OPTIONS.gameMode;
     this.useRandomMap = DEFAULT_OPTIONS.useRandomMap;
     this.bots = DEFAULT_OPTIONS.bots;
@@ -793,6 +812,7 @@ export class SinglePlayerModal extends BaseModal {
   }
 
   protected onOpen(args?: Record<string, unknown>): void {
+    this.selectedDifficulty = preferredSoloDifficulty();
     const save = args?.save;
     this.sharedSaveId = typeof save === "string" ? savedGameIdFrom(save) : null;
     // Saves made since the list last loaded (a game played in between).
@@ -830,6 +850,7 @@ export class SinglePlayerModal extends BaseModal {
 
   private handleDifficultySelection(value: Difficulty) {
     this.selectedDifficulty = value;
+    rememberSoloDifficulty(value);
   }
 
   private handleConfigDifficultySelected = (e: Event) => {
@@ -1192,6 +1213,7 @@ export class SinglePlayerModal extends BaseModal {
             gameMode: this.gameMode,
             playerTeams: this.teamCount,
             difficulty: this.selectedDifficulty,
+            spawnImmunityDuration: this.protectedStart ? 3000 : null,
             maxTimerValue: finalMaxTimerValue,
             bots: this.bots,
             infiniteGold: this.infiniteGold,

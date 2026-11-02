@@ -1,145 +1,199 @@
+﻿import { Difficulty } from "@openfront/engine-api/game/GameTypes";
+import { assetUrl } from "@openfront/shared/AssetUrls";
 import { LitElement, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
+import {
+  soloPresets,
+  preferredSoloDifficulty,
+  rememberSoloDifficulty,
+} from "../FriendsSoloPresets";
 import { loadModal } from "../LazyModals";
+import { playCue } from "../sound/CuePlayer";
+import { UserSettings } from "../UserSettings";
+import { commandIcon } from "./FriendsIcons";
+import "./FriendsFieldGuide";
+import "./FriendsWorldStatus";
+import "./friends-command.css";
 
-/** Private-match entry point. Uses the real lobby and simulation below. */
 @customElement("friends-welcome")
 export class FriendsWelcome extends LitElement {
+  @state() private selected = preferredSoloDifficulty();
+  @state() private muted = false;
+  private settings = new UserSettings();
+  private previousVolume = 0.7;
+  private lastHover = 0;
+  private syncDifficulty = () => {
+    this.selected = preferredSoloDifficulty();
+  };
   createRenderRoot() {
     return this;
   }
-
+  connectedCallback() {
+    super.connectedCallback();
+    document.documentElement.style.setProperty(
+      "--friends-menu-map",
+      `url("${assetUrl("images/GameplayScreenshot.png")}")`,
+    );
+    window.addEventListener("friends-difficulty-change", this.syncDifficulty);
+    this.muted = this.settings.audioVolume("master") === 0;
+    if (!document.querySelector("friends-world-status"))
+      document.body.appendChild(document.createElement("friends-world-status"));
+    if (!document.querySelector("friends-field-guide"))
+      document.body.appendChild(document.createElement("friends-field-guide"));
+  }
+  disconnectedCallback() {
+    window.removeEventListener(
+      "friends-difficulty-change",
+      this.syncDifficulty,
+    );
+    super.disconnectedCallback();
+  }
+  private testSound() {
+    if (this.settings.audioVolume("master") === 0) {
+      this.settings.setAudioVolume("master", 0.7);
+      this.muted = false;
+    }
+    playCue("game-start");
+  }
+  private hover() {
+    if (performance.now() - this.lastHover > 120) {
+      playCue("slider");
+      this.lastHover = performance.now();
+    }
+  }
   private async open(
     tag: "host-lobby-modal" | "join-lobby-modal" | "single-player-modal",
   ) {
+    playCue("click");
     await loadModal(tag);
-    const page =
+    window.showPage?.(
       tag === "host-lobby-modal"
         ? "page-host-lobby"
         : tag === "join-lobby-modal"
           ? "page-join-lobby"
-          : "page-single-player";
-    window.showPage?.(page);
+          : "page-single-player",
+    );
   }
-
+  private choose(difficulty: Difficulty) {
+    this.selected = difficulty;
+    rememberSoloDifficulty(difficulty);
+    playCue("click");
+  }
+  private toggleSound() {
+    const current = this.settings.audioVolume("master");
+    this.muted = current > 0;
+    if (this.muted) {
+      this.previousVolume = current;
+      this.settings.setAudioVolume("master", 0);
+    } else {
+      this.settings.setAudioVolume("master", this.previousVolume || 0.7);
+      playCue("click");
+    }
+  }
   render() {
-    const staticHosting = process.env.FRIENDS_STATIC === "true";
-    return html`
-      <style>
-        friends-welcome {
-          display: block;
-          margin: 10px 0 16px;
-          color: #eaf3ed;
-        }
-        .friends-panel {
-          padding: clamp(20px, 4vw, 38px);
-          border: 1px solid #8cae8355;
-          border-radius: 18px;
-          background: linear-gradient(125deg, #102e28f5, #131f2af5);
-          box-shadow: 0 18px 50px #0003;
-        }
-        .friends-eyebrow {
-          color: #a5d5ae;
-          font: 700 11px/1.5 system-ui;
-          letter-spacing: 0.22em;
-        }
-        .friends-panel h1 {
-          margin: 8px 0 10px;
-          font: 800 clamp(28px, 5vw, 48px)/1.05 system-ui;
-          letter-spacing: -0.04em;
-        }
-        .friends-panel p {
-          max-width: 620px;
-          color: #c4d3cd;
-          font: 15px/1.6 system-ui;
-          margin: 0 0 20px;
-        }
-        .friends-actions {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-        }
-        .friends-actions button {
-          border: 1px solid #91aa9b66;
-          border-radius: 9px;
-          padding: 13px 20px;
-          background: #213931;
-          color: #f5fff8;
-          font: 700 14px system-ui;
-          cursor: pointer;
-          transition:
-            transform 0.15s,
-            background 0.15s;
-        }
-        .friends-actions button:first-child {
-          background: #c6e7a4;
-          color: #12231c;
-          border-color: #c6e7a4;
-        }
-        .friends-actions button:hover {
-          transform: translateY(-2px);
-          filter: brightness(1.12);
-        }
-        .friends-actions button:focus-visible {
-          outline: 3px solid #8cbfff;
-          outline-offset: 3px;
-        }
-        .friends-note {
-          margin-top: 18px;
-          color: #9eb5aa;
-          font: 12px/1.6 system-ui;
-        }
-        .friends-note a {
-          color: #c6e7a4;
-          text-decoration: underline;
-        }
-        @media (max-width: 600px) {
-          .friends-actions button {
-            flex: 1 1 100%;
-          }
-        }
-      </style>
-      <section
-        class="friends-panel"
-        aria-label="OpenFront Friends private multiplayer"
+    const hosted = process.env.FRIENDS_STATIC === "true";
+    return html` <section
+      class="command-center"
+      aria-label="OpenFront command center"
+    >
+      <div class="command-topline">
+        <span class="command-status"><i></i> OPENFRONT / COMMAND CENTER</span>
+        <button
+          class="command-audio"
+          @click=${this.toggleSound}
+          aria-label=${this.muted ? "Enable sound" : "Mute sound"}
+          aria-pressed=${this.muted}
+        >
+          ${commandIcon("sound")} ${this.muted ? "SOUND OFF" : "SOUND ON"}
+        </button>
+      </div>
+      <div class="command-hero">
+        <div class="command-copy">
+          <span class="command-kicker">CONQUER THE REAL WORLD</span>
+          <h1>OPENFRONT<span> FRIENDS</span></h1>
+          <p>
+            Welcome, Commander. Choose your challenge and make the world yours.
+          </p>
+          <div class="command-actions">
+            <button
+              class="command-deploy"
+              @pointerenter=${this.hover}
+              @click=${() => this.open("single-player-modal")}
+            >
+              ${commandIcon("play")} PLAY SOLO ${commandIcon("arrow")}
+            </button>
+            ${hosted ? html`<a class="command-secondary" href="https://github.com/AGames21/openfront-friends/blob/main/PLAY-WITH-FRIENDS.md">Multiplayer setup ${commandIcon("arrow")}</a>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
+          </div>
+        </div>
+        <div class="command-globe" aria-hidden="true">
+          <div class="command-orbit"></div>
+          <div class="command-sphere">${commandIcon("globe")}</div>
+          <span class="command-coord">40.7° N / 74.0° W</span
+          ><span class="command-maplabel">GLOBAL OPERATIONS</span>
+        </div>
+      </div>
+      <div class="command-sectionhead">
+        <div>
+          <span class="command-kicker">YOUR NEXT CAMPAIGN</span>
+          <h2>Choose your challenge</h2>
+        </div>
+        <span class="command-difficulty-note"
+          >Real AI difficulty · Saved for next time</span
+        >
+      </div>
+      <div
+        class="command-difficulties"
+        role="group"
+        aria-label="Solo difficulty"
       >
-        <div class="friends-eyebrow">
-          OPENFRONT FRIENDS /
-          ${staticHosting ? "BROWSER EDITION" : "PRIVATE MULTIPLAYER"}
-        </div>
-        <h1>Your friends. One world.</h1>
-        <p>
-          Claim your territory, build an economy, and choose your allies.
-          ${staticHosting ? "Play a full solo match against bots, right in your browser." : "Host a private match and share the lobby link. Everyone plays together on your server."}
-        </p>
-        <div class="friends-actions">
-          ${
-            staticHosting
-              ? html`<button @click=${() => this.open("single-player-modal")}>
-                  Play solo
-                </button>`
-              : html`<button @click=${() => this.open("host-lobby-modal")}>
-                    Host a match →
-                  </button>
-                  <button @click=${() => this.open("join-lobby-modal")}>
-                    Join friends
-                  </button>
-                  <button @click=${() => this.open("single-player-modal")}>
-                    Practice solo
-                  </button>`
-          }
-        </div>
-        <div class="friends-note">
-          ${staticHosting ? "Hosted on GitHub Pages. Online multiplayer needs a separate game server; use the LAN edition from the source link to play with friends." : "Choose your name below. Friends on your Wi-Fi use this computer's LAN address on port 9000."}
-          <br />Independent OpenFront fork · © OpenFront and Contributors ·
-          <a
-            href="https://github.com/AGames21/openfront-friends"
-            target="_blank"
-            rel="noopener"
-            >Source code & setup</a
-          >
-        </div>
-      </section>
-    `;
+        ${soloPresets.map(
+          (preset, index) =>
+            html`<button
+              class="command-difficulty ${this.selected === preset.difficulty ? "selected" : ""}"
+              style=${`--rank-color:${preset.color}`}
+              aria-pressed=${this.selected === preset.difficulty}
+              @pointerenter=${this.hover}
+              @click=${() => this.choose(preset.difficulty)}
+            >
+              <div class="command-rankicon">
+                ${commandIcon(preset.icon)}<span>0${index + 1}</span>
+              </div>
+              <span class="command-rank">${preset.rank}</span
+              ><strong>${preset.name}</strong>
+              <p>${preset.description}</p>
+              <span class="command-bars" aria-hidden="true"
+                >${[0, 1, 2, 3].map((i) => html`<i class=${i <= index ? "lit" : ""}></i>`)}</span
+              >
+            </button>`,
+        )}
+      </div>
+      <div class="command-features">
+        ${[
+          ["city", "BUILD YOUR ECONOMY", "Cities & factories"],
+          ["shield", "HOLD THE LINE", "Defenses & diplomacy"],
+          ["port", "RULE THE SEAS", "Ports & warships"],
+        ].map(
+          ([icon, title, copy]) =>
+            html`<div>
+              ${commandIcon(icon)}<span
+                ><strong>${title}</strong><small>${copy}</small></span
+              >
+            </div>`,
+        )}
+      </div>
+      <div class="command-footer">
+        <button class="command-soundtest" @click=${this.testSound}>
+          ${commandIcon("sound")} Test launch sound</button
+        ><span
+          >${hosted ? "Browser solo available · Online multiplayer needs a separate server" : "Private multiplayer ready · Invite friends using your LAN address"}</span
+        >
+      </div>
+      <div class="command-credits">
+        © OpenFront and Contributors · Independent fork ·
+        <a href="https://github.com/AGames21/openfront-friends"
+          >Source & credits</a
+        >
+      </div>
+    </section>`;
   }
 }

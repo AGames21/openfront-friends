@@ -313,7 +313,7 @@ export class UnitDisplay extends LitElement implements Controller {
         <div
           class="${
             this.canBuild(unitType) ? "" : "opacity-40"
-          } border border-slate-500 rounded-sm px-0.5 pb-0.5 flex items-center gap-0.5 cursor-pointer
+          } command-unit-button border border-slate-500 rounded-sm px-0.5 pb-0.5 flex items-center gap-0.5 cursor-pointer
              ${selected ? "hover:bg-gray-400/10" : "hover:bg-gray-800"}
              rounded-sm text-white ${selected ? "bg-slate-400/20" : ""}
              ${this.tutorialHighlight === unitType ? "tutorial-highlight" : ""}"
@@ -355,8 +355,12 @@ export class UnitDisplay extends LitElement implements Controller {
                 </div>`
               : nothing
           }
-          <div class="flex items-center gap-0.5 pt-0.5">
+          <div class="command-unit-content flex items-center gap-0.5 pt-0.5">
             <img src=${icon} alt=${structureKey} class="align-middle size-5" />
+            <span
+              class="command-unit-price ${this.canBuild(unitType) ? "affordable" : ""}"
+              >${renderNumber(this.cost(unitType))}</span
+            >
             ${
               number !== null
                 ? html`<span class="text-xs">${renderNumber(number)}</span>`

@@ -11,6 +11,7 @@ import { customElement, state } from "lit/decorators.js";
 import { keyed } from "lit/directives/keyed.js";
 import { Controller } from "../../Controller";
 import { AttackRatioEvent } from "../../InputHandler";
+import { playCue } from "../../sound/CuePlayer";
 import { UIState } from "../../UIState";
 import { USER_SETTINGS_CHANGED_EVENT, UserSettings } from "../../UserSettings";
 import { getGamesPlayed, translateText } from "../../Utils";
@@ -529,103 +530,64 @@ export class ControlPanel extends LitElement implements Controller {
   }
 
   private renderDesktop() {
-    return html`
-      ${this.renderNotification()}
-      <!-- Row 1: troop rate | troop bar | gold -->
-      <div class="flex gap-1.5 items-center mb-1">
-        <!-- Troop rate -->
-        <div
-          class="flex items-center gap-1 shrink-0 border rounded-md font-bold text-sm py-0.5 px-1 w-[5.5rem] ${this.tutorialHighlightClass(
-            "troop_rate",
-          )} ${
-            this._troopRateIsIncreasing
-              ? "border-green-400"
-              : "border-orange-400"
-          }"
-          translate="no"
-        >
-          <img
-            src=${soldierIcon}
-            alt=""
-            aria-hidden="true"
-            width="13"
-            height="13"
-            class="shrink-0"
-            style="filter: ${
-              this._troopRateIsIncreasing
-                ? "brightness(0) saturate(100%) invert(74%) sepia(44%) saturate(500%) hue-rotate(83deg) brightness(103%)"
-                : "brightness(0) saturate(100%) invert(65%) sepia(60%) saturate(600%) hue-rotate(330deg) brightness(105%)"
-            }"
-          />
-          <span
-            class="text-sm font-bold tabular-nums ${
-              this._troopRateIsIncreasing ? "text-green-400" : "text-orange-400"
-            }"
-            >+${renderTroops(this.troopRate)}/s</span
-          >
+    const player = this.game?.myPlayer();
+    return html` ${this.renderNotification()}
+      <div class="command-resources">
+        <div class="command-nation">
+          <small>YOUR NATION</small
+          ><strong>${player?.name?.() ?? "Commander"}</strong
+          ><span>Build. Ally. Conquer.</span>
         </div>
-        <!-- Troop bar -->
-        <div class="flex-1 ${this.tutorialHighlightClass("troops")}">
+        <div class="command-troops ${this.tutorialHighlightClass("troops")}">
+          <header>
+            <small>TROOPS</small
+            ><b class=${this._troopRateIsIncreasing ? "positive" : "negative"}
+              >+${renderTroops(this.troopRate)}/s</b
+            >
+          </header>
           ${this.renderDesktopTroopBar()}
         </div>
-        <!-- Gold -->
         <div
-          class="flex items-center gap-1 shrink-0 border rounded-md border-yellow-400 font-bold text-yellow-400 text-sm py-0.5 px-1 min-w-[4.5rem] relative ${this.tutorialHighlightClass(
-            "gold",
-          )}"
-          translate="no"
+          class="command-attack ${this.tutorialHighlightClass("attack_ratio")}"
         >
-          ${
-            this._goldGain !== null
-              ? keyed(
-                  this._goldGainPulseId,
-                  html`<span
-                    class="gold-gain-pop absolute -top-5 right-[5px] min-[1015px]:right-[9px] text-green-400 text-sm font-extrabold tabular-nums whitespace-nowrap pointer-events-none drop-shadow-[0_2px_3px_rgba(0,0,0,0.9)]"
-                    >+${renderNumber(this._goldGain)}</span
-                  >`,
-                )
-              : ""
-          }
-          <img src=${goldCoinIcon} width="13" height="13" class="shrink-0" />
-          <span class="tabular-nums">${renderNumber(this._gold)}</span>
-        </div>
-      </div>
-      <!-- Row 2: attack ratio | slider -->
-      <div
-        class="flex items-center gap-1.5 ${this.tutorialHighlightClass(
-          "attack_ratio",
-        )}"
-        translate="no"
-      >
-        <div
-          class="flex items-center gap-1 shrink-0 border border-gray-600 rounded-md px-1 py-0.5 text-sm font-bold text-white cursor-pointer w-[8rem]"
-        >
-          <img
-            src=${swordIcon}
-            alt=""
-            aria-hidden="true"
-            width="12"
-            height="12"
-            style="filter: brightness(0) invert(1);"
-          />
-          <span
-            >${(this.attackRatio * 100).toFixed(0)}%
-            (${renderTroops(
-              (this.game?.myPlayer()?.troops() ?? 0) * this.attackRatio,
-            )})</span
+          <header>
+            <small>ATTACK</small><b>${Math.round(this.attackRatio * 100)}%</b>
+          </header>
+          <div class="command-attack-presets">
+            ${[10, 25, 35, 50, 75].map(
+              (percent) =>
+                html`<button
+                  aria-label=${`Send ${percent}% of troops`}
+                  aria-pressed=${Math.round(this.attackRatio * 100) === percent}
+                  @click=${() => {
+                    this.attackRatio = percent / 100;
+                    this.onAttackRatioChange(this.attackRatio);
+                    playCue("click");
+                  }}
+                >
+                  ${percent}%
+                </button>`,
+            )}
+          </div>
+          <input
+            aria-label="Attack strength"
+            type="range"
+            min="1"
+            max="100"
+            .value=${String(Math.round(this.attackRatio * 100))}
+            @input=${(e: Event) => this.handleRatioSliderInput(e)}
+            @pointerup=${(e: Event) => this.handleRatioSliderPointerUp(e)}
+          /><span
+            >Sends ${renderTroops((player?.troops() ?? 0) * this.attackRatio)}
+            troops</span
           >
         </div>
-        <input
-          type="range"
-          min="1"
-          max="100"
-          .value=${String(Math.round(this.attackRatio * 100))}
-          @input=${(e: Event) => this.handleRatioSliderInput(e)}
-          @pointerup=${(e: Event) => this.handleRatioSliderPointerUp(e)}
-          class="flex-1 h-1.5 accent-aquarius cursor-pointer"
-        />
-      </div>
-    `;
+        <div class="command-gold ${this.tutorialHighlightClass("gold")}">
+          <small>GOLD</small
+          ><strong>${renderNumber(this._gold)}</strong
+          >${this._goldGain !== null ? html`<span class="positive">+${renderNumber(this._goldGain)}</span>` : nothing}
+        </div>
+      </div>`;
   }
 
   private getMobileAttackRatioLabel(): string {

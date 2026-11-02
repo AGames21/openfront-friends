@@ -37,7 +37,7 @@ export type SoundEffect =
 
 export const soundEffectUrls: ReadonlyMap<SoundEffect, string> = new Map([
   ["ka-ching", assetUrl("sounds/effects/ka-ching.mp3")],
-  ["conquered", assetUrl("sounds/effects/conquered.mp3")],
+  ["conquered", assetUrl("sounds/effects/friends-conquer.wav")],
   ["atom-hit", assetUrl("sounds/effects/atom-hit.mp3")],
   ["atom-launch", assetUrl("sounds/effects/atom-launch.mp3")],
   ["hydrogen-hit", assetUrl("sounds/effects/hydrogen-hit.mp3")],
@@ -54,19 +54,19 @@ export const soundEffectUrls: ReadonlyMap<SoundEffect, string> = new Map([
   // Same morse-code cue as the alliance request, per the designer's notes.
   // One asset, two registry entries, rather than two identical files.
   ["message", assetUrl("sounds/effects/alliance-suggested.mp3")],
-  ["click", assetUrl("sounds/effects/click.mp3")],
+  ["click", assetUrl("sounds/effects/friends-click.wav")],
   ["click-1", assetUrl("sounds/effects/click-1.mp3")],
   ["click-2", assetUrl("sounds/effects/click-2.mp3")],
   ["click-3", assetUrl("sounds/effects/click-3.mp3")],
-  ["slider", assetUrl("sounds/effects/slider.mp3")],
+  ["slider", assetUrl("sounds/effects/friends-hover.wav")],
   ["alliance-accepted", assetUrl("sounds/effects/alliance-accepted.mp3")],
   ["alliance-declined", assetUrl("sounds/effects/alliance-declined.mp3")],
   ["build-factory", assetUrl("sounds/effects/build-factory.mp3")],
   ["build-train-station", assetUrl("sounds/effects/build-train-station.mp3")],
   ["transport-ship", assetUrl("sounds/effects/transport-ship.mp3")],
   ["nuke-warning", assetUrl("sounds/effects/nuke-warning.mp3")],
-  ["spawn", assetUrl("sounds/effects/spawn.mp3")],
-  ["game-start", assetUrl("sounds/effects/game-start.mp3")],
+  ["spawn", assetUrl("sounds/effects/friends-spawn.wav")],
+  ["game-start", assetUrl("sounds/effects/friends-launch.wav")],
   ["victory", assetUrl("sounds/effects/victory.mp3")],
   ["defeat", assetUrl("sounds/effects/defeat.mp3")],
 ]);

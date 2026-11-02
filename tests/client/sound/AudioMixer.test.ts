@@ -331,7 +331,7 @@ describe("per-channel budgets", () => {
   it("drops the newest interface tick rather than stuttering the ratchet", () => {
     build({ interface: 1 });
     for (let i = 0; i < 5; i++) mixer.play("slider");
-    const howl = howlInstances.find((h) => h.src.includes("slider"));
+    const howl = howlInstances.find((h) => h.src.includes("friends-hover"));
     expect(howl.play).toHaveBeenCalledTimes(4);
     expect(howl.fade).not.toHaveBeenCalled();
   });
