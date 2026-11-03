@@ -65,6 +65,33 @@
           }
         }
       }
+    },
+    "tankRooms": {
+      "$room": {
+        ".read": "auth != null",
+        "meta": {
+          ".write": "auth != null && !data.exists() && newData.child('host').val() === auth.uid",
+          ".validate": "newData.hasChildren(['host','name','createdAt']) && newData.child('name').isString() && newData.child('name').val().length <= 18 && newData.child('createdAt').isNumber() && newData.child('createdAt').val() <= now + 10000 && newData.child('createdAt').val() > now - 60000"
+        },
+        "guest": {
+          ".write": "auth != null && !data.exists() && newData.child('uid').val() === auth.uid && root.child('tankRooms').child($room).child('meta/host').exists() && root.child('tankRooms').child($room).child('meta/host').val() !== auth.uid && root.child('tankRooms').child($room).child('meta/createdAt').val() > now - 7200000",
+          ".validate": "newData.hasChildren(['uid','name']) && newData.child('name').isString() && newData.child('name').val().length <= 18"
+        },
+        "presence": {
+          "$uid": {
+            ".write": "auth != null && (root.child('tankRooms').child($room).child('meta/host').val() === auth.uid || root.child('tankRooms').child($room).child('guest/uid').val() === auth.uid) && auth.uid === $uid",
+            ".validate": "newData.isBoolean()"
+          }
+        },
+        "state": {
+          ".write": "auth != null && root.child('tankRooms').child($room).child('meta/host').val() === auth.uid && root.child('tankRooms').child($room).child('meta/createdAt').val() > now - 7200000",
+          ".validate": "newData.isString() && newData.val().length < 15000"
+        },
+        "input": {
+          ".write": "auth != null && root.child('tankRooms').child($room).child('guest/uid').val() === auth.uid",
+          ".validate": "newData.hasChildren(['x','y','a','fire']) && newData.child('x').isNumber() && newData.child('x').val() >= -1 && newData.child('x').val() <= 1 && newData.child('y').isNumber() && newData.child('y').val() >= -1 && newData.child('y').val() <= 1 && newData.child('a').isNumber() && newData.child('fire').isBoolean()"
+        }
+      }
     }
   }
 }

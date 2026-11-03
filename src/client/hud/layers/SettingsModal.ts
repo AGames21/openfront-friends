@@ -9,6 +9,7 @@ import { PauseGameIntentEvent } from "src/client/Transport";
 import { responseHasLinkedIdentity } from "../../AccountIdentity";
 import { ClientEnv } from "../../ClientEnv";
 import { Controller } from "../../Controller";
+import { flushCampaign } from "../../FriendsSaves";
 import {
   AlternateViewEvent,
   ToggleRenderDebugGuiEvent,
@@ -266,8 +267,9 @@ export class SettingsModal extends LitElement implements Controller {
     `;
   }
 
-  private onExitButtonClick() {
+  private async onExitButtonClick() {
     // redirect to the home page
+    await flushCampaign();
     window.location.href = homeHref();
   }
 

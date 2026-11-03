@@ -1901,7 +1901,12 @@ class Client {
       console.error("game client failed to load:", err);
       if (this.mostRecentJoinEvent !== event.timeStamp) return;
       // The URL names the singleplayer game now, which no server has.
-      if (isSingleplayer) history.replaceState(null, "", "/");
+      if (isSingleplayer)
+        history.replaceState(
+          null,
+          "",
+          process.env.FRIENDS_STATIC === "true" ? homeHref() : "/",
+        );
       if (claimGameClientReload()) {
         reloadForUpdate();
         return;
@@ -1919,7 +1924,11 @@ class Client {
         startingModal.hide();
       }
       // handleLeaveLobby only resets the URL once a lobby handle exists.
-      history.replaceState(null, "", "/");
+      history.replaceState(
+        null,
+        "",
+        process.env.FRIENDS_STATIC === "true" ? homeHref() : "/",
+      );
       void this.handleLeaveLobby();
       void showInGameAlert(translateText("error_modal.game_client_failed"));
       return;
@@ -2195,12 +2204,17 @@ class Client {
       return;
     }
     console.log("leaving lobby, cancelling game");
+    await import("./FriendsSaves").then((saves) => saves.flushCampaign());
     this.lobbyHandle.stop(true);
     this.lobbyHandle = null;
     this.currentUrl = null;
 
     try {
-      history.replaceState(null, "", "/");
+      history.replaceState(
+        null,
+        "",
+        process.env.FRIENDS_STATIC === "true" ? homeHref() : "/",
+      );
     } catch (e) {
       console.warn("Failed to restore URL on leave:", e);
     }

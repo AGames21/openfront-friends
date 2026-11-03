@@ -31,3 +31,8 @@ Games open in the same tab. The top-left AG Arcade button saves the current worl
 Worlds autosave every ten seconds in IndexedDB, separately for a signed-in account or guest on this browser. Continue saved world restores the last complete snapshot. An online world resumes as a local continuation, not a rejoin to an old room. Keep browser site data; private browsing, clearing storage, a different browser/device, or an incompatible future save format can prevent continuation. This is local-device saving, not cloud synchronization. Retro Bowl uses its existing browser career saves; the arcade wrapper preserves their origin and storage.
 
 All AI levels were eased: nation capacity multipliers Easy/Normal/Hard/Extreme are 0.30/0.45/0.65/0.85; growth multipliers are 0.65/0.75/0.85/0.95; attack intervals are 100-145/85-120/70-100/55-85 ticks. Human stats remain unchanged. Tribes use one-quarter base capacity and a 0.35 growth multiplier.
+
+
+## Quit and save-backup navigation
+
+The in-game Exit to menu button and settings exit return to /openfront-friends/, not the AG Arcade root. A snapshot flush runs before leaving. The separate AG Arcade back link intentionally returns to the library. AG Arcade now exports/restores the current account/guest world through Save backups; sign-in credentials are excluded. Private tank rooms use a separate tankRooms namespace and isolated anonymous sessions; see the arcade repository MULTIPLAYER-AND-SAVES.md.

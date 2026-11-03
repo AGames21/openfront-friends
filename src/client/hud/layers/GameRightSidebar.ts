@@ -5,10 +5,11 @@ import { html, LitElement } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { createNextLobby } from "../../Api";
 import { ClientEnv } from "../../ClientEnv";
+import { Controller } from "../../Controller";
 import "../../components/DoomsdayClockPanel";
 import "../../components/OvertimePanel";
-import { Controller } from "../../Controller";
 import { isDesktopShell } from "../../DesktopShell";
+import { flushCampaign } from "../../FriendsSaves";
 import { gamePortal } from "../../GamePortal";
 import { showInGameAlert, showInGameConfirm } from "../../InGameModal";
 import { TogglePauseIntentEvent } from "../../InputHandler";
@@ -279,6 +280,7 @@ export class GameRightSidebar extends LitElement implements Controller {
     await gamePortal.requestMidgameAd();
     await gamePortal.gameplayStop();
     // redirect to the home page
+    await flushCampaign();
     window.location.href = homeHref();
   }
 
@@ -400,9 +402,14 @@ export class GameRightSidebar extends LitElement implements Controller {
             : ""
         }
 
-        <div class="cursor-pointer" @click=${this.onExitButtonClick}>
-          <img src=${exitIcon} alt="exit" width="20" height="20" />
-        </div>
+        <button
+          type="button"
+          class="cursor-pointer"
+          aria-label="Exit to menu"
+          @click=${this.onExitButtonClick}
+        >
+          <img src=${exitIcon} alt="" width="20" height="20" />
+        </button>
       </aside>
       <doomsday-clock-panel
         .game=${this.game}

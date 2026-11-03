@@ -993,6 +993,7 @@ export function currentPagePath(path: string): string {
  * lands on `latest` rather than back on the build they were leaving.
  */
 export function homeHref(): string {
+  if (process.env.FRIENDS_STATIC === "true") return import.meta.env.BASE_URL;
   const siteHost = ClientEnv.siteHost();
   if (siteHost !== undefined && window.location.host !== siteHost) {
     return `https://${siteHost}/`;

@@ -40,3 +40,10 @@ Browser checks verified same-tab launch and return, hidden upstream menu items, 
 ## 2026-11-03 hover card overlap
 
 Lowered the world-control HUD below hovered-player cards and offset the cards below the bar on desktop/mobile. Production build passed. Browser layout checks populated the real player-info component and verified its card clears the world bar: desktop bar bottom 78.5px/card top 100px; mobile bar bottom 101px/card top 110px. Screenshots: outputs/hover-layout-1440.png and hover-layout-390.png in the task workspace. These check seeded hover-card layout, not every possible unit/building tooltip. Existing unrelated event-feed wrapping changes remain uncommitted.
+
+
+## 2026-11-03 OpenFront exit and real world backups
+
+Production Pages build and full workspace TypeScript checks passed; six targeted engine/survivor tests passed. Browser automation used the actual in-game Exit to menu button, accepted its confirmation, and verified the OpenFront menu at /openfront-friends/ with Continue saved world. It then used AG Arcade Save backups to export a real world, removed that world from IndexedDB, restored the downloaded JSON through the UI, and resumed a snapshot with positive game ticks. This checks real snapshot export/import, not a placeholder file.
+
+Firebase rules add tankRooms for the original arena; authenticated host-only state writes and guest-only input writes were verified with real isolated browsers. Google/email and existing OpenFront room rules are preserved; anonymous arena sign-in was enabled on the free project.
