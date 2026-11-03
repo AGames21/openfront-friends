@@ -27,3 +27,7 @@
 .command-save-note strong {
   color: #ffd18b;
 }
+
+/* Hovered nation/unit cards sit below the fixed world-control HUD. */
+.in-game player-info-overlay { margin-top: 100px; }
+@media (max-width:1023px) { .in-game player-info-overlay > div { top: 110px !important; } }

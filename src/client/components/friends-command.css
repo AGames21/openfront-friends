@@ -631,7 +631,8 @@ friends-world-status {
   top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 6000;
+  /* Keep hover cards above the world-control bar. */
+  z-index: 900;
   pointer-events: none;
   font-family: system-ui;
 }

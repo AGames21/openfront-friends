@@ -35,3 +35,8 @@ Hidden upstream purchase/store/inventory/online leaderboard/clan navigation in t
 Regression tests cover host and guest continuation for 61 seconds, beyond the former 45-second timeout. Real Firebase two-browser verification matched hashes at 0/100/200/300, played past spawning, closed the host, and confirmed guest ticks advancing from 340 to 376 without a kick. IndexedDB stored a real 478679-byte worker snapshot; a reload and Continue saved world restored tick 392. Temporary test accounts/rooms were removed. Worlds autosave every ten seconds per browser account/guest; this is local-device persistence, not cross-device cloud sync. Full-match victory remains untested.
 
 Browser checks verified same-tab launch and return, hidden upstream menu items, removed NFL chart, and real native Retro Bowl savedata.ini persistence across refresh. The classic browser game is accurately labeled a 2026 schedule fan season; the official NFL Retro Bowl 27 app and licensed real-player/coach roster are not included.
+
+
+## 2026-11-03 hover card overlap
+
+Lowered the world-control HUD below hovered-player cards and offset the cards below the bar on desktop/mobile. Production build passed. Browser layout checks populated the real player-info component and verified its card clears the world bar: desktop bar bottom 78.5px/card top 100px; mobile bar bottom 101px/card top 110px. Screenshots: outputs/hover-layout-1440.png and hover-layout-390.png in the task workspace. These check seeded hover-card layout, not every possible unit/building tooltip. Existing unrelated event-feed wrapping changes remain uncommitted.
