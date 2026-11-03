@@ -361,7 +361,7 @@ export class Config {
     }
 
     if (player.type() === PlayerType.Bot) {
-      return maxTroops / 3;
+      return maxTroops / 4;
     }
 
     if (player.type() === PlayerType.Human) {
@@ -370,13 +370,13 @@ export class Config {
 
     switch (this._gameConfig.difficulty) {
       case Difficulty.Easy:
-        return maxTroops * 0.5;
+        return maxTroops * 0.3;
       case Difficulty.Medium:
-        return maxTroops * 0.65;
+        return maxTroops * 0.45;
       case Difficulty.Hard:
-        return maxTroops * 1; // Like humans
+        return maxTroops * 0.65;
       case Difficulty.Impossible:
-        return maxTroops * 1.25;
+        return maxTroops * 0.85;
       default:
         assertNever(this._gameConfig.difficulty);
     }
@@ -391,22 +391,22 @@ export class Config {
     toAdd *= ratio;
 
     if (player.type() === PlayerType.Bot) {
-      toAdd *= 0.5;
+      toAdd *= 0.35;
     }
 
     if (player.type() === PlayerType.Nation) {
       switch (this._gameConfig.difficulty) {
         case Difficulty.Easy:
-          toAdd *= 0.9;
+          toAdd *= 0.65;
           break;
         case Difficulty.Medium:
-          toAdd *= 0.92;
+          toAdd *= 0.75;
           break;
         case Difficulty.Hard:
-          toAdd *= 1; // Like humans
+          toAdd *= 0.85;
           break;
         case Difficulty.Impossible:
-          toAdd *= 1.05;
+          toAdd *= 0.95;
           break;
         default:
           assertNever(this._gameConfig.difficulty);

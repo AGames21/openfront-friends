@@ -30,6 +30,7 @@ import { ClientEnv } from "../client/ClientEnv";
 import { reloadForUpdate, translateText } from "../client/Utils";
 import { MapLayerController } from "./controllers/MapLayerController";
 import { isDesktopShell } from "./DesktopShell";
+import { startCampaignAutosave } from "./FriendsSaves";
 import { GameMetrics } from "./GameMetrics";
 import { createRenderer, GameRenderer } from "./hud/GameRenderer";
 import { goldRateTracker } from "./hud/layers/lib/GoldRateTracker";
@@ -949,6 +950,7 @@ async function createClientGame(
 }
 
 export class ClientGameRunner {
+  private stopCampaignAutosave: (() => void) | null = null;
   private myPlayer: PlayerView | null = null;
   private isActive = false;
 
@@ -1005,6 +1007,11 @@ export class ClientGameRunner {
     console.log("starting client game");
 
     this.isActive = true;
+    this.stopCampaignAutosave = startCampaignAutosave(
+      this.worker,
+      this.lobby,
+      this.clientID,
+    );
     this.lastMessageTime = Date.now();
     this.metrics?.start();
     setTimeout(() => {
@@ -1227,6 +1234,7 @@ export class ClientGameRunner {
   }
 
   public stop() {
+    this.stopCampaignAutosave?.();
     this.soundManager.dispose();
     this.graphicsListenerAbort?.abort();
     // Detach the input handler's window/canvas listeners and its EventBus

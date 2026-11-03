@@ -6,7 +6,6 @@ import {
   onDisconnect,
   push,
   ref,
-  remove,
   set,
   Unsubscribe,
 } from "firebase/database";
@@ -32,6 +31,7 @@ export class FriendsRelay {
   private acks: Record<string, number> = {};
   private writing = false;
   private stopped = false;
+  private continuingAlone = false;
   private lastActivity = Date.now();
   private session: FriendsSession;
   constructor(private config: LobbyConfig) {
@@ -60,6 +60,7 @@ export class FriendsRelay {
     });
     this.off.push(
       onChildAdded(this.path("turns"), (snapshot) => {
+        if (this.continuingAlone || this.stopped) return;
         const turn = JSON.parse(snapshot.val()) as Turn;
         if (turn.turnNumber !== this.turns.length) {
           this.fail(
@@ -88,10 +89,7 @@ export class FriendsRelay {
     );
     this.off.push(
       onValue(this.path("closed"), (x) => {
-        if (x.exists())
-          this.fail(
-            "The other player left. Return to the menu to find another match.",
-          );
+        if (x.exists()) this.continueAlone();
       }),
     );
     void set(this.path(`acks/${s.uid}`), 0).catch(() =>
@@ -127,10 +125,18 @@ export class FriendsRelay {
     }
     this.timer = setInterval(() => {
       if (this.stopped) return;
-      if (Date.now() - this.lastActivity > 45000) {
-        this.fail(
-          "The match lost its connection. Return to the menu and try again.",
-        );
+      if (!this.continuingAlone && Date.now() - this.lastActivity > 45000) {
+        this.continueAlone();
+        return;
+      }
+      if (this.continuingAlone) {
+        if (this.turns.length - this.executed >= 3) return;
+        const turn: Turn = {
+          turnNumber: this.turns.length,
+          intents: this.intents.splice(0),
+        };
+        this.turns.push(turn);
+        this.message({ type: "turn", turn });
         return;
       }
       if (
@@ -159,11 +165,20 @@ export class FriendsRelay {
     }, 100);
   }
   onMessage(msg: ClientMessage) {
-    if (msg.type === "hash" && msg.turnNumber % 100 === 0)
+    if (
+      !this.continuingAlone &&
+      msg.type === "hash" &&
+      msg.turnNumber % 100 === 0
+    )
       void set(
         this.path(`hashes/${msg.turnNumber}/${this.session.uid}`),
         msg.hash,
       ).catch(() => {});
+    if (this.continuingAlone && msg.type === "intent") {
+      if (msg.intent.type !== "toggle_pause")
+        this.intents.push({ ...msg.intent, clientID: this.session.clientID });
+      return;
+    }
     if (
       msg.type === "intent" &&
       !this.stopped &&
@@ -184,12 +199,34 @@ export class FriendsRelay {
   }
   turnComplete() {
     this.executed++;
+    if (this.continuingAlone) return;
     void set(this.path(`acks/${this.session.uid}`), this.executed).catch(() =>
       this.fail("Multiplayer connection lost."),
     );
   }
+  private continueAlone() {
+    if (this.stopped || this.continuingAlone) return;
+    this.continuingAlone = true;
+    this.off.splice(0).forEach((f) => f());
+    this.intents = [
+      {
+        type: "mark_disconnected",
+        isDisconnected: true,
+        clientID:
+          this.session.uid === this.session.hostUID
+            ? this.config.gameStartInfo!.players[1].clientID
+            : this.config.gameStartInfo!.players[0].clientID,
+      },
+    ];
+    document.dispatchEvent(
+      new CustomEvent("friends-online-notice", {
+        detail:
+          "Your opponent left. Your world continues, and your progress will keep saving.",
+      }),
+    );
+  }
   private fail(message: string) {
-    if (this.stopped) return;
+    if (this.stopped || this.continuingAlone) return;
     this.stopped = true;
     clearInterval(this.timer);
     this.off.splice(0).forEach((f) => f());
@@ -198,17 +235,8 @@ export class FriendsRelay {
     );
   }
   endGame() {
-    if (!this.stopped)
-      void set(this.path("closed"), true)
-        .then(() => {
-          if (this.session.uid === this.session.hostUID)
-            setTimeout(() => {
-              void remove(ref(friendsDB, `rooms/${this.session.roomID}`)).catch(
-                () => {},
-              );
-            }, 10000);
-        })
-        .catch(() => {});
+    if (!this.stopped && !this.continuingAlone)
+      void set(this.path("closed"), true).catch(() => {});
     this.stopped = true;
     clearInterval(this.timer);
     this.off.splice(0).forEach((f) => f());

@@ -1,0 +1,29 @@
+.arcade-return {
+  position: fixed;
+  top: 12px;
+  left: 14px;
+  z-index: 9998;
+  padding: 9px 14px;
+  border: 1px solid #67809d;
+  border-radius: 10px;
+  background: #132237ed;
+  color: #f7cf88;
+  text-decoration: none;
+  font: 700 13px system-ui;
+  box-shadow: 0 3px 18px #0005;
+}
+.command-center {
+  padding-top: 54px;
+}
+.in-game .arcade-return {
+  top: 50px;
+}
+
+.command-save-note {
+  color: #a8b8ce;
+  font: 13px/1.6 system-ui;
+  margin: 20px 0;
+}
+.command-save-note strong {
+  color: #ffd18b;
+}

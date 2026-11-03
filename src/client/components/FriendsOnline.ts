@@ -34,7 +34,7 @@ import type { FriendsSession } from "../FriendsRelay";
 import type { JoinLobbyEvent } from "../Main";
 
 type Member = { uid: string; clientID: string; name: string };
-const VERSION = "friends-v1-20261102";
+const VERSION = "friends-v2-20261103";
 export const MATCH_WAIT_MS = 20_000;
 export function normalMatch(
   gameID: string,
@@ -89,13 +89,21 @@ export class FriendsOnline extends LitElement {
       this.user = u;
     });
     document.addEventListener("friends-online-error", this.matchError);
+    document.addEventListener("friends-online-notice", this.matchNotice);
   }
   disconnectedCallback() {
     this.authOff?.();
     document.removeEventListener("friends-online-error", this.matchError);
+    document.removeEventListener("friends-online-notice", this.matchNotice);
     void this.cancelQueue?.();
     super.disconnectedCallback();
   }
+  private matchNotice = (e: Event) => {
+    this.notice = (e as CustomEvent<string>).detail;
+    setTimeout(() => {
+      this.notice = "";
+    }, 12000);
+  };
   private matchError = (e: Event) => {
     this.status = (e as CustomEvent<string>).detail;
     this.opened = true;

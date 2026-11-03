@@ -1,4 +1,4 @@
-﻿import { Difficulty } from "@openfront/engine-api/game/GameTypes";
+import { Difficulty } from "@openfront/engine-api/game/GameTypes";
 import { assetUrl } from "@openfront/shared/AssetUrls";
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
@@ -14,11 +14,14 @@ import { commandIcon } from "./FriendsIcons";
 import "./FriendsFieldGuide";
 import "./FriendsWorldStatus";
 import "./friends-command.css";
+import "./friends-arcade.css";
 
 @customElement("friends-welcome")
 export class FriendsWelcome extends LitElement {
   @state() private selected = preferredSoloDifficulty();
   @state() private muted = false;
+  @state() private savedAt = 0;
+  @state() private saveError = false;
   private settings = new UserSettings();
   private previousVolume = 0.7;
   private lastHover = 0;
@@ -35,7 +38,27 @@ export class FriendsWelcome extends LitElement {
       `url("${assetUrl("images/GameplayScreenshot.png")}")`,
     );
     window.addEventListener("friends-difficulty-change", this.syncDifficulty);
+    if (!document.querySelector(".arcade-return")) {
+      const back = document.createElement("a");
+      back.className = "arcade-return";
+      back.href = "https://agames21.github.io/#games";
+      back.textContent = "← AG Arcade";
+      back.setAttribute("aria-label", "Back to AG Arcade");
+      back.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const saves = await import("../FriendsSaves");
+        await saves.flushCampaign();
+        location.href = back.href;
+      });
+      document.body.appendChild(back);
+    }
     this.muted = this.settings.audioVolume("master") === 0;
+    void import("../FriendsSaves")
+      .then(async (saves) => {
+        this.savedAt = (await saves.readCampaign())?.savedAt ?? 0;
+      })
+      .catch(() => {});
+    document.addEventListener("friends-save-status", this.saveStatus);
     if (!document.querySelector("friends-world-status"))
       document.body.appendChild(document.createElement("friends-world-status"));
     if (!document.querySelector("friends-field-guide"))
@@ -47,6 +70,15 @@ export class FriendsWelcome extends LitElement {
       this.syncDifficulty,
     );
     super.disconnectedCallback();
+  }
+  private saveStatus = (e: Event) => {
+    const data = (e as CustomEvent).detail;
+    this.saveError = Boolean(data.error);
+    if (data.savedAt) this.savedAt = data.savedAt;
+  };
+  private async resume() {
+    const saves = await import("../FriendsSaves");
+    await saves.resumeCampaign();
   }
   private testSound() {
     if (this.settings.audioVolume("master") === 0) {
@@ -129,6 +161,7 @@ export class FriendsWelcome extends LitElement {
             Welcome, Commander. Choose your challenge and make the world yours.
           </p>
           <div class="command-actions">
+            ${this.savedAt ? html`<button class="command-secondary" @click=${this.resume}>Continue saved world</button>` : html``}
             <button
               class="command-deploy"
               @pointerenter=${this.hover}
@@ -195,6 +228,10 @@ export class FriendsWelcome extends LitElement {
             </div>`,
         )}
       </div>
+      <p class="command-save-note">
+        ${this.saveError ? "Saving is unavailable. Check that this browser allows site storage." : "World progress autosaves every 10 seconds on this device."}
+        ${this.savedAt ? `Last saved ${new Date(this.savedAt).toLocaleString()}` : "Your first save appears after starting a world."}
+      </p>
       <div class="command-footer">
         <button class="command-soundtest" @click=${this.testSound}>
           ${commandIcon("sound")} Test launch sound</button

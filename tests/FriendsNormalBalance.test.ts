@@ -19,7 +19,7 @@ describe("Normal solo balance", () => {
     const caps = configs.map((c) => c.maxTroops(nation));
     expect(caps[0]).toBeLessThan(caps[1]);
     expect(caps[1]).toBeLessThan(caps[2]);
-    expect(caps[1] / caps[2]).toBeCloseTo(0.65);
+    expect(caps[1] / caps[2]).toBeCloseTo(0.45 / 0.65);
     const growth = configs.map((c) => c.troopIncreaseRate(nation));
     expect(growth[0]).toBeLessThan(growth[1]);
     expect(growth[1]).toBeLessThan(growth[2]);
