@@ -10,7 +10,7 @@ import { LitElement, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { keyed } from "lit/directives/keyed.js";
 import { Controller } from "../../Controller";
-import { AttackRatioEvent } from "../../InputHandler";
+import { AttackRatioEvent, isForwardedClick } from "../../InputHandler";
 import { playCue } from "../../sound/CuePlayer";
 import { UIState } from "../../UIState";
 import { USER_SETTINGS_CHANGED_EVENT, UserSettings } from "../../UserSettings";
@@ -364,6 +364,28 @@ export class ControlPanel extends LitElement implements Controller {
     (e.target as HTMLInputElement).blur();
   }
 
+  /**
+   * The browser only moves a range input on a real pointer press. A tap that
+   * the radial menu forwarded down from its overlay never reaches the slider
+   * as a press, so move it from the tap position here.
+   */
+  private handleRatioSliderClick(e: MouseEvent) {
+    if (!isForwardedClick(e)) return;
+    const input = e.currentTarget as HTMLInputElement | null;
+    if (!input) return;
+    const rect = input.getBoundingClientRect();
+    if (rect.width === 0) return;
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const position = Math.min(
+      Math.max((e.clientX - rect.left) / rect.width, 0),
+      1,
+    );
+    const value = Math.round(min + position * (max - min));
+    input.value = String(value);
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
   private calculateTroopBar(): { greenPercent: number; orangePercent: number } {
     const base = Math.max(this._maxTroops, 1);
     const greenPercentRaw = (this._troops / base) * 100;
@@ -577,6 +599,8 @@ export class ControlPanel extends LitElement implements Controller {
             .value=${String(Math.round(this.attackRatio * 100))}
             @input=${(e: Event) => this.handleRatioSliderInput(e)}
             @pointerup=${(e: Event) => this.handleRatioSliderPointerUp(e)}
+            @click=${(e: MouseEvent) => this.handleRatioSliderClick(e)}
+            data-radial-click-through
           /><span
             >Sends ${renderTroops((player?.troops() ?? 0) * this.attackRatio)}
             troops</span
@@ -667,6 +691,10 @@ export class ControlPanel extends LitElement implements Controller {
             .value=${String(Math.round(this.attackRatio * 100))}
             @input=${(e: Event) => this.handleRatioSliderInput(e)}
             @pointerup=${(e: Event) => this.handleRatioSliderPointerUp(e)}
+            @click=${(e: MouseEvent) => this.handleRatioSliderClick(e)}
+            data-radial-click-through
+            @click=${(e: MouseEvent) => this.handleRatioSliderClick(e)}
+            data-radial-click-through
             class="w-full h-1.5 accent-aquarius cursor-pointer"
           />
         </div>

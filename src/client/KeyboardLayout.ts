@@ -4,6 +4,7 @@ export type KeyboardLayoutMap = Map<string, string>;
 
 type KeyboardApi = {
   getLayoutMap(): Promise<KeyboardLayoutMap>;
+  // Some browsers expose getLayoutMap() on a Keyboard that isn't an EventTarget.
   addEventListener?(event: string, callback: () => void): void;
   removeEventListener?(event: string, callback: () => void): void;
 };
