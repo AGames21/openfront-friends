@@ -29,6 +29,7 @@ import {
 } from "firebase/database";
 import { LitElement, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { validateDisplayName } from "../FriendsDisplayName";
 import { friendsAuth, friendsDB } from "../FriendsFirebase";
 import type { FriendsSession } from "../FriendsRelay";
 import type { JoinLobbyEvent } from "../Main";
@@ -76,6 +77,9 @@ export class FriendsOnline extends LitElement {
   @state() private status = "";
   @state() private notice = "";
   @state() private seconds = 20;
+  @state() private displayName = "";
+  @state() private savedDisplayName = "";
+  @state() private nameLoading = false;
   private email = "";
   private password = "";
   private cancelQueue: (() => Promise<void>) | null = null;
@@ -87,6 +91,10 @@ export class FriendsOnline extends LitElement {
     super.connectedCallback();
     this.authOff = onAuthStateChanged(friendsAuth, (u) => {
       this.user = u;
+      this.displayName = "";
+      this.savedDisplayName = "";
+      this.nameLoading = Boolean(u);
+      if (u) void this.loadDisplayName(u);
     });
     document.addEventListener("friends-online-error", this.matchError);
     document.addEventListener("friends-online-notice", this.matchNotice);
@@ -111,6 +119,43 @@ export class FriendsOnline extends LitElement {
   open() {
     this.opened = true;
     this.status = "";
+  }
+  private async loadDisplayName(user: User) {
+    try {
+      const snapshot = await get(
+        ref(friendsDB, `profiles/${user.uid}/displayName`),
+      );
+      if (this.user?.uid !== user.uid) return;
+      if (snapshot.exists()) {
+        const name = validateDisplayName(snapshot.val());
+        this.displayName = name;
+        this.savedDisplayName = name;
+      }
+    } catch {
+      if (this.user?.uid === user.uid)
+        this.status =
+          "Could not load your display name. You can save a name below.";
+    } finally {
+      if (this.user?.uid === user.uid) this.nameLoading = false;
+    }
+  }
+  private async saveDisplayName() {
+    if (!this.user || this.busy || this.nameLoading) return;
+    let name: string;
+    try {
+      name = validateDisplayName(this.displayName);
+    } catch (error) {
+      this.status = (error as Error).message;
+      return;
+    }
+    const uid = this.user.uid;
+    await this.action(async () => {
+      await set(ref(friendsDB, `profiles/${uid}/displayName`), name);
+      if (this.user?.uid !== uid) return;
+      this.displayName = name;
+      this.savedDisplayName = name;
+      this.status = "Display name saved. New matches will use " + name + ".";
+    });
   }
   private async action(fn: () => Promise<unknown>) {
     if (this.busy) return;
@@ -166,17 +211,18 @@ export class FriendsOnline extends LitElement {
     );
   }
   private async matchmaking() {
-    if (!this.user || this.busy) return;
+    if (!this.user || this.busy || this.nameLoading) return;
+    if (!this.savedDisplayName) {
+      this.status = "Choose and save a display name before joining a match.";
+      return;
+    }
     this.busy = true;
     this.status = "Searching for another commander...";
     this.seconds = 20;
     const me: Member = {
       uid: this.user.uid,
       clientID: generateID(),
-      name:
-        (this.user.displayName || "Commander")
-          .replace(/[^a-zA-Z0-9 _-]/g, "")
-          .slice(0, 20) || "Commander",
+      name: this.savedDisplayName,
     };
     let done = false;
     let off: Unsubscribe = () => {};
@@ -420,14 +466,41 @@ export class FriendsOnline extends LitElement {
         ${
           this.user
             ? html`<p>
-                  Signed in as
-                  <strong
-                    >${this.user.displayName || this.user.email || "Commander"}</strong
-                  >
+                  ${this.savedDisplayName ? html`Playing as <strong>${this.savedDisplayName}</strong>` : "You're signed in. Choose a display name below."}
                 </p>
+                <form
+                  @submit=${(e: Event) => {
+                    e.preventDefault();
+                    void this.saveDisplayName();
+                  }}
+                >
+                  <label
+                    >Display name<input
+                      type="text"
+                      autocomplete="nickname"
+                      minlength="2"
+                      maxlength="20"
+                      required
+                      placeholder="Map Master"
+                      .value=${this.displayName}
+                      ?disabled=${this.busy || this.nameLoading}
+                      @input=${(e: Event) => {
+                        this.displayName = (e.target as HTMLInputElement).value;
+                      }}
+                  /></label>
+                  <p class="online-help">
+                    ${this.nameLoading ? "Loading your game profile…" : "Choose the name other players see. Use 2–20 letters, numbers, spaces, underscores or hyphens."}
+                  </p>
+                  <button
+                    type="submit"
+                    ?disabled=${this.busy || this.nameLoading || this.displayName === this.savedDisplayName}
+                  >
+                    Save display name
+                  </button>
+                </form>
                 <button
                   class="command-deploy"
-                  ?disabled=${this.busy}
+                  ?disabled=${this.busy || this.nameLoading || !this.savedDisplayName}
                   @click=${this.matchmaking}
                 >
                   ${this.busy ? `Searching · ${this.seconds}s` : "Find multiplayer match"}

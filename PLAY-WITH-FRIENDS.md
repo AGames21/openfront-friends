@@ -36,3 +36,8 @@ All AI levels were eased: nation capacity multipliers Easy/Normal/Hard/Extreme a
 ## Quit and save-backup navigation
 
 The in-game Exit to menu button and settings exit return to /openfront-friends/, not the AG Arcade root. A snapshot flush runs before leaving. The separate AG Arcade back link intentionally returns to the library. AG Arcade now exports/restores the current account/guest world through Save backups; sign-in credentials are excluded. Private tank rooms use a separate tankRooms namespace and isolated anonymous sessions; see the arcade repository MULTIPLAYER-AND-SAVES.md.
+
+
+## Your public display name
+
+After signing in with Google or email, choose and save a display name in the Multiplayer panel. It is stored in your own Firebase game profile and used for new matches and AI fallbacks. Names use 2-20 letters, digits, spaces, underscores or hyphens; extra whitespace is normalized. The name can be changed later in the same panel. Your Google account name is not changed or automatically published as the match name. Profile data is private to its owner; the chosen name is shared with players through the match roster.

@@ -47,3 +47,10 @@ Lowered the world-control HUD below hovered-player cards and offset the cards be
 Production Pages build and full workspace TypeScript checks passed; six targeted engine/survivor tests passed. Browser automation used the actual in-game Exit to menu button, accepted its confirmation, and verified the OpenFront menu at /openfront-friends/ with Continue saved world. It then used AG Arcade Save backups to export a real world, removed that world from IndexedDB, restored the downloaded JSON through the UI, and resumed a snapshot with positive game ticks. This checks real snapshot export/import, not a placeholder file.
 
 Firebase rules add tankRooms for the original arena; authenticated host-only state writes and guest-only input writes were verified with real isolated browsers. Google/email and existing OpenFront room rules are preserved; anonymous arena sign-in was enabled on the free project.
+
+
+## 2026-11-03 Google account display names
+
+Added an owner-only Firebase profiles/$uid/displayName field and editable public-name form. Matchmaking requires a saved validated name, rather than using the Google account real name. Nine normalization/validation tests and the Pages production build passed. Google sign-in using Firebase emulators verified first-time name choice, invalid-name rejection, saving, owner-only profile rules, preservation of the Google identity displayName, another Google sign-in and reload persistence. The test then launched an AI-fallback game and checked its human player name. Personal Google account authorization was not automated.
+
+Live Firebase checks with a temporary email account also passed saving, server-side rejection of an invalid name, reload persistence and renaming. That temporary account/profile was deleted. The Google-emulator game test verified the human player was named Map Master-7; no personal Google account was used.
