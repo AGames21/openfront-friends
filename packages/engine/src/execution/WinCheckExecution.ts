@@ -28,6 +28,7 @@ export class WinCheckExecution implements Execution {
   }
 
   tick(ticks: number) {
+    if (this.mg?.config().gameConfig().friendsMode) return; // The mission director owns its objective win conditions.
     if (ticks % 10 !== 0) {
       return;
     }

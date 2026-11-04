@@ -24,6 +24,7 @@ import { UserSettings } from "../../UserSettings";
 import { resolveKeybindLabel, translateText } from "../../Utils";
 import { GameView } from "../../view";
 import {
+  airfieldIcon,
   atomBombIcon,
   cityIcon,
   defensePostIcon,
@@ -59,6 +60,7 @@ export class UnitDisplay extends LitElement implements Controller {
   private _port = 0;
   private _defensePost = 0;
   private _samLauncher = 0;
+  private _airfields = 0;
   private allDisabled = false;
   private enabledUnitCount = 0;
   private tutorialMode = false;
@@ -458,6 +460,7 @@ export class UnitDisplay extends LitElement implements Controller {
     this._port = player.totalUnitLevels(UnitType.Port);
     this._defensePost = player.totalUnitLevels(UnitType.DefensePost);
     this._samLauncher = player.totalUnitLevels(UnitType.SAMLauncher);
+    this._airfields = player.totalUnitLevels(UnitType.Airfield);
     this._factories = player.totalUnitLevels(UnitType.Factory);
     this._warships = player.totalUnitLevels(UnitType.Warship);
     this.requestUpdate();
@@ -570,6 +573,13 @@ export class UnitDisplay extends LitElement implements Controller {
               "mirv",
               this.getHotkey("buildMIRV", "Digit0"),
             )}
+            ${this.renderUnitItem(
+              airfieldIcon,
+              this._airfields,
+              UnitType.Airfield,
+              "airfield",
+              "",
+            )}
           </div>
         </div>
         ${this.renderUnitTooltip()}
@@ -628,7 +638,7 @@ export class UnitDisplay extends LitElement implements Controller {
           class="${
             this.canBuild(unitType) ? "" : "opacity-40"
           } command-unit-button border border-slate-500 rounded-sm px-0.5 pb-0.5 flex items-center gap-0.5 cursor-pointer
-             ${selected ? "hover:bg-gray-400/10" : "hover:bg-gray-800"}
+             ${selected ? "pointer-fine:hover:bg-gray-400/10" : "pointer-fine:hover:bg-gray-800"}
              rounded-sm text-white ${selected ? "bg-slate-400/20" : ""}
              ${this.tutorialHighlight === unitType ? "tutorial-highlight" : ""}"
           @click=${(event: Event) => {

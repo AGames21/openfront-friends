@@ -1,3 +1,4 @@
+import type { FriendsMission } from "@openfront/engine-api/game/FriendsContent";
 import {
   Difficulty,
   GameMapSize,
@@ -18,18 +19,19 @@ import { html, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { translateText } from "../client/Utils";
 import { responseHasLinkedIdentity } from "./AccountIdentity";
+import { BaseModal } from "./components/BaseModal";
 import "./components/baseComponents/Button";
 import "./components/baseComponents/Modal";
-import { BaseModal } from "./components/BaseModal";
 import { MEDAL_ORDER, medalIcon } from "./components/map/Medals";
-import "./components/GameConfigSettings";
 import {
   type LoadSavedGameDetail,
   savedGameIdFrom,
 } from "./components/SavedGamesPanel";
+import "./components/GameConfigSettings";
 import { modalHeader } from "./components/ui/ModalHeader";
-import "./components/ToggleInputCard";
 import { getPlayerCosmetics, prewarmCosmetics } from "./Cosmetics";
+import "./components/ToggleInputCard";
+import { missionConfig } from "./FriendsMissionCatalog";
 import {
   preferredSoloDifficulty,
   rememberSoloDifficulty,
@@ -707,11 +709,35 @@ export class SinglePlayerModal extends BaseModal {
     this.resetOptions();
   }
 
-  /**
-   * Starts the onboarding tutorial (docs/OnboardingTutorial.md) without
-   * opening the modal: the Tutorial map, with OnboardingOverlay guiding the
-   * player through spawning, attacking and boats.
-   */
+  /** Launch an objective-based mission through the normal solo start pipeline. */
+  public async startMission(
+    mode: FriendsMission,
+    difficulty: Difficulty,
+  ): Promise<void> {
+    if (this.starting) return;
+    await this.launch(async ({ resolvedName, cosmetics }, usernameInput) => {
+      const gameID = generateID();
+      return {
+        gameID,
+        gameStartInfo: {
+          gameID,
+          lobbyCreatedAt: Date.now(),
+          players: [
+            {
+              clientID: generateID(),
+              username: resolvedName.name,
+              clanTag: usernameInput?.getClanTag() ?? null,
+              cosmetics,
+            },
+          ],
+          config: missionConfig(mode, difficulty),
+        },
+        source: "singleplayer",
+      };
+    });
+  }
+
+  /** Start the onboarding map with its dedicated guide. */
   public async startTutorial(): Promise<void> {
     // The modal never opens on this path, so onOpen's prewarm never runs.
     void prewarmCosmetics();
@@ -1205,6 +1231,7 @@ export class SinglePlayerModal extends BaseModal {
             },
           ],
           config: {
+            friendsAircraft: process.env.FRIENDS_STATIC === "true",
             gameMap: this.selectedMap,
             gameMapSize: this.compactMap
               ? GameMapSize.Compact

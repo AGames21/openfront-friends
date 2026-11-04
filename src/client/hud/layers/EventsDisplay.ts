@@ -293,6 +293,19 @@ export class EventsDisplay extends LitElement implements Controller {
       return;
     }
 
+    if (event.message === "friends_mission_status") {
+      try {
+        document.dispatchEvent(
+          new CustomEvent("friends-mission-state", {
+            detail: JSON.parse(String(event.params?.state ?? "{}")),
+          }),
+        );
+      } catch {
+        /* Invalid status is not rendered as HTML. */
+      }
+      return;
+    }
+
     // Captured trade-ship gold is surfaced as a transient +gold pip in
     // control-panel rather than as a scroll-list entry.
     if (event.message === "events_display.received_gold_from_captured_ship") {

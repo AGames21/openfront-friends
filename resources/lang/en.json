@@ -200,7 +200,8 @@
       "mirv": "Huge explosion, only targets selected player",
       "missile_silo": "Used to launch nukes",
       "port": "Sends trade ships to generate gold",
-      "sam_launcher": "Defends against incoming nukes",
+      "sam_launcher": "Defends against incoming nukes and aircraft",
+      "airfield": "Automatically launches aircraft to raid nearby enemy armies. Enemy Iron Domes can intercept them.",
       "warship": "Captures trade ships, destroys ships and boats"
     },
     "not_enough_money": "Not enough money",
@@ -1922,6 +1923,7 @@
     "view_leaderboard": "View leaderboard"
   },
   "player_stats_table": {
+    "aircraft_stats": "Aircraft",
     "arrived": "Arrived",
     "attack_stats": "Attack Statistics",
     "betrayals": "Betrayals",
@@ -2659,6 +2661,8 @@
     "title": "Tutorial"
   },
   "unit_type": {
+    "airfield": "Airfield",
+    "aircraft": "Aircraft",
     "atom_bomb": "Atom Bomb",
     "boat": "Boat",
     "city": "City",

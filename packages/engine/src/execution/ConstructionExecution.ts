@@ -14,6 +14,7 @@ import type {
   SnapshotReader,
   SnapshotWriter,
 } from "../snapshot/SnapshotContext";
+import { AirfieldExecution } from "./AirfieldExecution";
 import { CityExecution } from "./CityExecution";
 import { DefensePostExecution } from "./DefensePostExecution";
 import { FactoryExecution } from "./FactoryExecution";
@@ -144,6 +145,9 @@ export class ConstructionExecution implements Execution {
           new WarshipExecution({ owner: player, patrolTile: this.tile }),
         );
         break;
+      case UnitType.Airfield:
+        this.mg.addExecution(new AirfieldExecution(this.structure!));
+        break;
       case UnitType.Port:
         this.mg.addExecution(new PortExecution(this.structure!));
         break;
@@ -180,6 +184,7 @@ export class ConstructionExecution implements Execution {
       case UnitType.SAMLauncher:
       case UnitType.City:
       case UnitType.Factory:
+      case UnitType.Airfield:
         return true;
       default:
         return false;

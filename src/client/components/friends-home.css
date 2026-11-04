@@ -1,0 +1,758 @@
+friends-welcome .friends-home {
+  --fh-text: #f5f4ee;
+  --fh-muted: #a2aeb6;
+  --fh-gold: #edce8e;
+  box-sizing: border-box;
+  max-width: 980px;
+  margin: 26px auto 60px;
+  color: var(--fh-text);
+  font-family: Inter, system-ui, sans-serif;
+  background: linear-gradient(135deg, #182126f5, #10171cf7);
+  border: 1px solid #ffffff20;
+  border-radius: 18px;
+  box-shadow: 0 30px 110px #0007;
+  overflow: hidden;
+  text-align: left;
+}
+.friends-home * {
+  box-sizing: border-box;
+}
+.fh-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px;
+  border-bottom: 1px solid #ffffff10;
+  gap: 12px;
+}
+.fh-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  color: #f5f4ee;
+  text-decoration: none;
+}
+.fh-brand > span {
+  font-size: 26px;
+  color: var(--fh-gold);
+}
+.fh-brand small {
+  font-size: 8px;
+  color: var(--fh-muted);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  padding-left: 12px;
+  border-left: 1px solid #ffffff25;
+}
+.friends-home button {
+  cursor: pointer;
+  font-family: inherit;
+}
+.fh-icon-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  color: #b8c4cb;
+  padding: 8px;
+  font-size: 11px;
+}
+.fh-icon-button svg {
+  width: 17px;
+  height: 17px;
+}
+.fh-intro {
+  padding: 42px 32px 30px;
+  position: relative;
+  background: radial-gradient(ellipse at top right, #526a6330, transparent 60%);
+}
+.fh-eyebrow {
+  color: #bca780;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+.fh-intro h1 {
+  font-size: clamp(30px, 4.2vw, 46px);
+  letter-spacing: -1.8px;
+  line-height: 1.13;
+  margin: 12px 0 14px;
+  font-weight: 750;
+  color: #fff;
+}
+.fh-intro p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fh-muted);
+  margin: 0;
+}
+.fh-play-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 32px 32px;
+}
+.fh-play-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  min-width: 0;
+  min-height: 230px;
+  padding: 24px;
+  border: 1px solid #ffffff22;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #26313880, #1d282d55);
+  color: #f5f4ee;
+  text-align: left;
+  transition:
+    transform 0.18s,
+    border-color 0.18s,
+    background 0.18s;
+}
+.fh-play-card:hover {
+  transform: translateY(-4px);
+  border-color: #bda67b;
+  background: #28363d;
+}
+.fh-primary {
+  background: linear-gradient(145deg, #f1dbab, #d9b96f);
+  border-color: #edce8e;
+  color: #22251f;
+}
+.fh-primary:hover {
+  background: linear-gradient(145deg, #ffe9b9, #e8c980);
+  border-color: #fff0c0;
+}
+.fh-card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid #ffffff25;
+  border-radius: 10px;
+  background: #ffffff06;
+  margin-bottom: 24px;
+}
+.fh-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+.fh-primary .fh-card-icon {
+  border-color: #43371b30;
+  background: #493e1d0d;
+}
+.fh-card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fh-card-copy small {
+  font: 700 8px/1.4 system-ui;
+  letter-spacing: 0.1em;
+  color: #9cabb4;
+}
+.fh-primary .fh-card-copy small {
+  color: #686042;
+}
+.fh-card-copy strong {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.7px;
+}
+.fh-card-copy > span {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #b4c0c7;
+}
+.fh-primary .fh-card-copy > span {
+  color: #56543d;
+}
+.fh-card-arrow {
+  position: absolute;
+  right: 20px;
+  top: 24px;
+  font-size: 22px;
+  color: #cbbd9f;
+}
+.fh-primary .fh-card-arrow {
+  color: #66542d;
+}
+.fh-bottom {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+  padding: 24px 32px 30px;
+  border-top: 1px solid #ffffff10;
+  background: #0000000d;
+}
+.fh-continue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.fh-continue > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fh-continue strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.fh-continue small,
+.fh-settings small {
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--fh-muted);
+}
+.fh-continue button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #8b7e5f;
+  border-radius: 7px;
+  color: #f1dbab;
+  background: #edce8e0b;
+  padding: 12px 15px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.fh-continue svg {
+  width: 16px;
+  height: 16px;
+}
+.fh-settings {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  border-left: 1px solid #ffffff16;
+  padding-left: 22px;
+}
+.fh-settings label {
+  font-size: 12px;
+  font-weight: 550;
+}
+.fh-settings small {
+  grid-column: 1/-1;
+}
+.fh-settings select {
+  font: 12px system-ui;
+  background: #263239;
+  border: 1px solid #ffffff25;
+  border-radius: 6px;
+  color: #f5f4ee;
+  padding: 8px 12px;
+  min-height: 36px;
+}
+.fh-footer {
+  padding: 16px 32px;
+  border-top: 1px solid #ffffff10;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #8d9ca5;
+  font-size: 9px;
+}
+.fh-footer a {
+  color: #aab8c0;
+  text-decoration: none;
+}
+.fh-footer a:hover {
+  color: #f1dbab;
+}
+.friends-home :focus-visible {
+  outline: 2px solid var(--fh-gold);
+  outline-offset: 4px;
+}
+.fh-storage-error {
+  padding: 0 32px;
+  color: #f1be9c;
+  font-size: 12px;
+}
+.fh-missions {
+  padding: 26px 32px 32px;
+}
+.fh-back {
+  background: transparent;
+  color: #bdc9d0;
+  border: 0;
+  padding: 0 0 24px;
+  font-size: 12px;
+}
+@media (max-width: 680px) {
+  friends-welcome .friends-home {
+    margin: 12px 0 76px;
+    border-radius: 13px;
+  }
+  .fh-header {
+    padding: 18px 20px;
+  }
+  .fh-brand small {
+    display: none;
+  }
+  .fh-intro {
+    padding: 28px 20px 24px;
+  }
+  .fh-intro h1 {
+    letter-spacing: -1px;
+  }
+  .fh-play-grid {
+    padding: 0 20px 24px;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .fh-play-card {
+    min-height: 120px;
+    flex-direction: row;
+    align-items: center;
+    gap: 18px;
+    padding: 20px;
+  }
+  .fh-card-icon {
+    margin: 0;
+    flex-shrink: 0;
+  }
+  .fh-card-copy strong {
+    font-size: 22px;
+  }
+  .fh-card-copy {
+    gap: 5px;
+  }
+  .fh-card-arrow {
+    top: 18px;
+    right: 16px;
+    font-size: 19px;
+  }
+  .fh-bottom {
+    grid-template-columns: 1fr;
+    padding: 22px 20px;
+    gap: 22px;
+  }
+  .fh-settings {
+    border-left: 0;
+    border-top: 1px solid #ffffff16;
+    padding: 18px 0 0;
+  }
+  .fh-footer {
+    padding: 16px 20px;
+    font-size: 8px;
+  }
+  .fh-missions {
+    padding: 22px 20px;
+  }
+  .fh-icon-button span {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fh-play-card {
+    transition: none;
+  }
+  .fh-play-card:hover {
+    transform: none;
+  }
+}
+.friends-mission-hud {
+  position: fixed;
+  top: 62px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(400px, calc(100vw - 24px));
+  z-index: 700;
+  background: #121d25ed;
+  color: #eef1e9;
+  border: 1px solid #77846a80;
+  border-radius: 10px;
+  font: 12px/1.5 system-ui;
+  box-shadow: 0 8px 30px #0006;
+  backdrop-filter: blur(10px);
+}
+.friends-mission-hud header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  gap: 15px;
+}
+.fm-hud-title {
+  font-weight: 700;
+  color: #edce8e;
+}
+.friends-mission-hud header button {
+  background: transparent;
+  border: 1px solid #ffffff30;
+  border-radius: 5px;
+  padding: 0 8px;
+  color: #ccd6db;
+  cursor: pointer;
+}
+.fm-hud-body {
+  padding: 0 14px 12px;
+}
+.fm-hud-body p {
+  font-size: 11px;
+  margin: 0 0 8px;
+  color: #b5c3ca;
+}
+.fm-hud-progress {
+  display: block;
+  font-size: 12px;
+}
+.fm-hud-timer {
+  display: block;
+  color: #e8ce98;
+  margin-top: 4px;
+}
+.friends-mission-hud.minimized .fm-hud-body {
+  display: none;
+}
+.friends-mission-hud[data-result="victory"] {
+  border-color: #79b78b;
+}
+.friends-mission-hud[data-result="defeat"] {
+  border-color: #d78a7b;
+}
+.fm-heading h2 {
+  margin: 10px 0;
+  font-size: 28px;
+  letter-spacing: -1px;
+}
+.fm-heading p {
+  font-size: 12px;
+  color: #aab9c3;
+  line-height: 1.6;
+}
+.fm-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+.fm-card {
+  border: 1px solid #ffffff22;
+  background: #ffffff04;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.fm-card > span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #c1aa7f;
+}
+.fm-card h3 {
+  font-size: 18px;
+  margin: 10px 0 8px;
+  letter-spacing: -0.4px;
+}
+.fm-card p {
+  font-size: 11px;
+  color: #b3c1ca;
+  line-height: 1.7;
+  margin: 0 0 16px;
+  flex: 1;
+}
+.fm-card footer {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.fm-card button {
+  background: #e7cd98;
+  color: #242920;
+  border: 1px solid #e7cd98;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-weight: 650;
+  font-size: 11px;
+}
+.fm-card button.fm-coop {
+  background: transparent;
+  color: #dfd1b1;
+  border-color: #68715e;
+}
+.fm-card button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.fm-note {
+  font-size: 10px;
+  color: #b7c3ca;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+@media (max-width: 600px) {
+  .fm-grid {
+    grid-template-columns: 1fr;
+  }
+  .friends-mission-hud {
+    top: 58px;
+  }
+  .fm-heading h2 {
+    font-size: 24px;
+  }
+}
+.friends-online-panel.fo-panel {
+  box-sizing: border-box;
+  width: min(740px, calc(100vw - 28px));
+  padding: 26px;
+  background: #151e24f7;
+  border-color: #ffffff25;
+  border-radius: 14px;
+  box-shadow: 0 24px 100px #0009;
+  font-family: Inter, system-ui, sans-serif;
+  text-align: left;
+}
+.fo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #ffffff15;
+}
+.fo-header h2 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.8px;
+  margin: 7px 0 0;
+}
+.fo-panel button {
+  font: 600 12px/1.4 system-ui;
+  min-height: 39px;
+  padding: 9px 15px;
+  background: #27353f;
+  color: #e8eeef;
+  border: 1px solid #ffffff25;
+  border-radius: 7px;
+}
+.fo-panel button:disabled {
+  opacity: 0.4;
+}
+.fo-panel .fo-primary {
+  background: #edce8e;
+  color: #22281f;
+  border-color: #edce8e;
+}
+.fo-google {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px !important;
+  margin: 22px 0;
+}
+.fo-auth-intro h3 {
+  font-size: 19px;
+  margin: 24px 0 10px;
+  font-weight: 650;
+}
+.fo-auth-intro p {
+  font-size: 12px;
+  color: #afbdc7;
+  line-height: 1.8;
+  max-width: 470px;
+}
+.fo-panel input,
+.fo-panel select {
+  box-sizing: border-box;
+  min-height: 43px;
+  background: #10191f;
+  color: #eff2ed;
+  border: 1px solid #53616b;
+  border-radius: 7px;
+  padding: 10px;
+  font: 13px system-ui;
+  width: 100%;
+}
+.fo-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 11px;
+  color: #c0cdd4;
+}
+.fo-panel summary {
+  font-size: 12px;
+  color: #c8b88f;
+  cursor: pointer;
+  padding: 12px 0;
+  list-style: revert;
+}
+.fo-panel details {
+  border-top: 1px solid #ffffff15;
+  margin-top: 16px;
+}
+.fo-email-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.fo-panel .online-buttons,
+.fo-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.fo-name-form {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  margin: 16px 0;
+}
+.fo-name-form label {
+  flex: 1;
+}
+.fo-account {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  font-size: 12px;
+  color: #b8c6cf;
+}
+.fo-account strong {
+  color: #f2e5c7;
+}
+.fo-account button {
+  min-height: 30px;
+  padding: 5px 9px;
+  font-size: 10px;
+  background: transparent;
+}
+.fo-panel .fo-name-edit {
+  margin: 0;
+  border: 0;
+}
+.fo-name-edit summary {
+  font-size: 10px;
+  padding: 8px 0;
+}
+.fo-status {
+  font-size: 12px;
+  color: #e7c78c;
+  line-height: 1.6;
+  min-height: 1em;
+}
+.fo-footer {
+  font-size: 10px;
+  color: #8e9ea8;
+  margin-top: 14px;
+  border-top: 1px solid #ffffff12;
+  padding-top: 14px;
+}
+.fo-panel .server-browser {
+  margin-top: 4px;
+}
+.fo-panel .server-create {
+  background: #1d2830;
+  border: 1px solid #ffffff18;
+  border-radius: 8px;
+  padding: 14px;
+  gap: 12px;
+}
+.fo-panel .server-heading h3,
+.fo-panel .server-create h3 {
+  font-size: 15px;
+}
+.fo-panel .online-help,
+.fo-panel .server-empty,
+.fo-panel small {
+  font-size: 11px;
+  line-height: 1.6;
+  color: #a8b8c3;
+}
+.fo-panel .server-row {
+  background: #202d36;
+  border-color: #ffffff20;
+}
+.fo-panel .server-code-form {
+  gap: 10px;
+  align-items: flex-end;
+}
+.fo-panel .server-code-form button {
+  min-height: 43px;
+}
+.fo-panel .friends-party {
+  margin: 14px 0 20px;
+  background: #1c2830;
+  border-color: #ffffff1c;
+  padding: 18px;
+}
+.fo-panel .friends-party h3 {
+  font-size: 17px;
+  font-weight: 650;
+}
+.fo-panel .friends-party .party-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+}
+.fo-panel :focus-visible {
+  outline: 2px solid #edce8e;
+  outline-offset: 3px;
+}
+@media (max-width: 550px) {
+  .friends-online-panel.fo-panel {
+    padding: 20px;
+  }
+  .fo-email-fields {
+    grid-template-columns: 1fr;
+  }
+  .fo-panel .friends-party .party-create {
+    grid-template-columns: 1fr;
+  }
+  .fo-name-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .fo-panel .friends-party {
+    padding: 14px;
+  }
+}
+.fh-brand {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.fm-hud-progress {
+  overflow-wrap: anywhere;
+}
+
+.fh-card-arrow svg {
+  width: 20px;
+  height: 20px;
+  transform: rotate(-45deg);
+}
+.fh-footer a {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fh-footer svg {
+  width: 11px;
+  height: 11px;
+  transform: rotate(-45deg);
+}
+.fm-card button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.fm-card button svg {
+  width: 14px;
+  height: 14px;
+}

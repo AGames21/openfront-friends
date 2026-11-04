@@ -32,6 +32,7 @@ import type {
   SnapshotReader,
   SnapshotWriter,
 } from "../snapshot/SnapshotContext";
+import { ConstructionExecution } from "./ConstructionExecution";
 import { NationAllianceBehavior } from "./nation/NationAllianceBehavior";
 import { NationAttackBehavior } from "./nation/NationAttackBehavior";
 import { NationEmojiBehavior } from "./nation/NationEmojiBehavior";
@@ -87,6 +88,40 @@ export class NationExecution implements Execution {
       this.player = this.mg.addPlayer(this.nation.playerInfo);
     } else {
       this.player = this.mg.player(this.nation.playerInfo.id);
+    }
+  }
+
+  private maybeBuildAirfield(ticks: number) {
+    const player = this.player;
+    if (
+      !player ||
+      this.mg.config().isUnitDisabled(UnitType.Airfield) ||
+      ticks % 300 !== player.smallID() % 300 ||
+      player.unitsConstructed(UnitType.Airfield) > 0 ||
+      player.numTilesOwned() < 600
+    )
+      return;
+    const cost = this.mg.unitInfo(UnitType.Airfield).cost(this.mg, player);
+    if (player.gold() < cost + 500000n) return;
+    const home = player.spawnTile();
+    if (home === undefined) return;
+    for (const [dx, dy] of [
+      [12, 0],
+      [-12, 0],
+      [0, 12],
+      [0, -12],
+    ]) {
+      const x = this.mg.x(home) + dx,
+        y = this.mg.y(home) + dy;
+      if (x < 0 || y < 0 || x >= this.mg.width() || y >= this.mg.height())
+        continue;
+      const tile = this.mg.ref(x, y);
+      if (player.canBuild(UnitType.Airfield, tile) !== false) {
+        this.mg.addExecution(
+          new ConstructionExecution(player, UnitType.Airfield, tile),
+        );
+        break;
+      }
     }
   }
 
@@ -198,6 +233,19 @@ export class NationExecution implements Execution {
       return;
     }
 
+    const mission = this.mg.config().gameConfig().friendsMode;
+    if (
+      mission &&
+      (mission === "iron-dome" ||
+        mission === "island" ||
+        mission === "fortress" ||
+        ticks < 600)
+    ) {
+      if (ticks % this.attackRate === this.attackTick)
+        this.attackBehavior.expandIntoFreeLand();
+      return; // Missile launches belong exclusively to the challenge's wave schedule.
+    }
+
     // The tutorial's nations only grow into free land, and the one on the
     // player's island nukes them from its silo (TutorialSilo): no attacks,
     // boats, alliances or other structures. Each falls once the player has
@@ -212,6 +260,7 @@ export class NationExecution implements Execution {
       return;
     }
 
+    this.maybeBuildAirfield(ticks);
     this.attackBehavior.followUpLandings();
     this.nukeBehavior.followUpStrikes();
 

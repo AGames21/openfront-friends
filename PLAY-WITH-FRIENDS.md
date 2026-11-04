@@ -6,12 +6,12 @@ Play at https://agames21.github.io/openfront-friends/ .
 
 1. Click **Multiplayer**.
 2. Sign in with Google, or create/sign in to an email and password account.
-3. Click **Find multiplayer match**. Keep the tab open.
+3. Open **Quick play & classic servers**, then click **Find multiplayer match**. Keep the tab open.
 4. If another commander joins within 20 seconds, both players share the same world with AI nations. If nobody joins, the game clearly switches to **Normal AI**.
 
 Online games currently support two humans plus AI, on the compact World map, with Normal difficulty and five-minute border protection. Queue cancellation is available. Your account stays signed in across reloads; use Sign out on a shared device. Password recovery is available in the account panel.
 
-Matches are casual and peer-hosted: the first player's browser orders turns and both browsers simulate them. If either player leaves, the remaining player continues the same world locally. The departing nation is marked disconnected; there is no kick or match reset. A network outage also switches the survivor to local play after a grace period. A desync still shows an error rather than silently merging different worlds. Rejoining a departed match, large public lobbies, ranked play, and dedicated-server anti-cheat are not implemented.
+Matches are casual and peer-hosted: the first player's browser orders turns and both browsers simulate them. If either player leaves, the remaining player continues the same world locally. The departing nation is marked disconnected; there is no kick or match reset. A network outage also switches the survivor to local play after a grace period. A desync still shows an error rather than silently merging different worlds. Use the separate Play with friends rooms below for reconnecting. Large public lobbies, ranked play, and dedicated-server anti-cheat are not implemented.
 
 ## Hosting and maintenance
 
@@ -23,7 +23,6 @@ Database rules in `database.rules.json` require authentication, restrict room da
 
 For the original full Node server and larger private lobbies, run `npm run friends` locally and share its LAN address with friends on the same network. The GitHub Pages multiplayer button uses Firebase matchmaking instead of this server.
 
-
 ## Saved worlds and the AG Arcade edition
 
 Games open in the same tab. The top-left AG Arcade button saves the current world before returning to the library. The upstream store, inventory, clan, online leaderboard, and Steam purchase menus are hidden in this edition; source credits remain.
@@ -32,11 +31,9 @@ Worlds autosave every ten seconds in IndexedDB, separately for a signed-in accou
 
 All AI levels were eased: nation capacity multipliers Easy/Normal/Hard/Extreme are 0.30/0.45/0.65/0.85; growth multipliers are 0.65/0.75/0.85/0.95; attack intervals are 100-145/85-120/70-100/55-85 ticks. Human stats remain unchanged. Tribes use one-quarter base capacity and a 0.35 growth multiplier.
 
-
 ## Quit and save-backup navigation
 
 The in-game Exit to menu button and settings exit return to /openfront-friends/, not the AG Arcade root. A snapshot flush runs before leaving. The separate AG Arcade back link intentionally returns to the library. AG Arcade now exports/restores the current account/guest world through Save backups; sign-in credentials are excluded. Private tank rooms use a separate tankRooms namespace and isolated anonymous sessions; see the arcade repository MULTIPLAYER-AND-SAVES.md.
-
 
 ## Your public display name
 
@@ -64,3 +61,37 @@ Quick play and the original public/private server browser keep their previous
 behavior. Use the new Play with friends room options for reconnect and map voting.
 Chat supports every player in a new room. These rooms reuse existing member-only
 Firebase paths and do not require changing deployed database rules.
+
+## Missions, aircraft and the new home
+
+The home screen groups play into **Solo**, **Multiplayer**, and **Missions**.
+The difficulty selector applies to newly started solo games and missions.
+Continue restores your most recent saved world, including an unfinished mission.
+Chat and notifications remain in the bottom-left panel.
+
+Open **Missions** for these objectives:
+
+- **Co-op survival:** 60 seconds to prepare, then ten escalating AI waves.
+- **Capture points:** hold two of three marked beacons to accumulate 180 control seconds. Each held beacon also supplies 25,000 gold and 2,000 troops every ten seconds. Team members share objective score in 2v2.
+- **Iron Dome challenge:** protect your command city through eight increasingly dense missile waves, or destroy the enemy launch sites. A starting Iron Dome and extra funds help you prepare.
+- **Operation Lifeline:** reach the stranded ally and maintain your nearby presence for 30 seconds while keeping its command city alive.
+- **Island defense:** protect your command city through six naval invasions.
+- **Fortress assault:** capture or destroy an enemy command city protected by defense posts, an Iron Dome, and an airfield.
+
+Survival and capture points support **Play with friends**, using the existing
+reconnectable rooms and map vote. Choose the activity before creating a room.
+Survival puts every human on the same team, with troop and gold donations;
+capture points supports 1v1 or 2v2. The four story challenges start solo with a
+prepared base. Survival and capture points let players pick their starting tile.
+
+New games enable **Airfields** in the Build menu and build bar. An airfield costs
+750,000 gold initially, takes ten seconds to build, and automatically sends one
+aircraft at a time at nearby enemy targets (220 map tiles, a 30-second launch
+interval). Aircraft raid enemy troop reserves and damage nearby warships, then
+return; they do not capture territory. Enemy Iron Domes spend ammunition to
+intercept them. Expanding AI nations can build airfields too.
+
+Mission counters, aircraft sorties and objectives are saved in snapshots and
+replayed deterministically in room matches. Existing saved worlds keep their
+original rules. Older active online-room histories use a different version;
+start a fresh room after this update so everyone runs the same simulation.

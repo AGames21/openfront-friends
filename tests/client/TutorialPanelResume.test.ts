@@ -5,11 +5,14 @@ import type { TutorialPanel } from "../../src/client/hud/layers/TutorialPanel";
 import type { UserSettings } from "../../src/client/UserSettings";
 import type { GameView } from "../../src/client/view";
 
-function firstTick(resumedFromSave: boolean) {
+function firstTick(resumedFromSave: boolean, friendsMode?: string) {
   const myPlayer = vi.fn(() => null);
   const panel = document.createElement("tutorial-panel") as TutorialPanel;
   panel.game = {
-    config: () => ({ isReplay: () => false, gameConfig: () => ({}) }),
+    config: () => ({
+      isReplay: () => false,
+      gameConfig: () => ({ friendsMode }),
+    }),
     myPlayer,
     resumedFromSave: () => resumedFromSave,
     setOwnSpawnRing: vi.fn(),
@@ -32,5 +35,8 @@ describe("TutorialPanel", () => {
   // until they next attack.
   it("stays off in a game resumed from a save", () => {
     expect(firstTick(true).myPlayer).not.toHaveBeenCalled();
+  });
+  it("leaves missions to their objective guide", () => {
+    expect(firstTick(false, "fortress").myPlayer).not.toHaveBeenCalled();
   });
 });

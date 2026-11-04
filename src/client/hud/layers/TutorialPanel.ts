@@ -147,7 +147,8 @@ export class TutorialPanel extends LitElement implements Controller {
       this.setActive(
         !this.userSettings.tutorialDismissed() &&
           !this.game.resumedFromSave() &&
-          this.game.config().gameConfig().tutorial !== true,
+          this.game.config().gameConfig().tutorial !== true &&
+          !this.game.config().gameConfig().friendsMode,
       );
     }
     if (!this.active) return;

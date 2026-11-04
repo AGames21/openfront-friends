@@ -18,6 +18,7 @@ import { UIState } from "../UIState";
 // The homepage loads it on demand, but the in-game instance (#game-settings)
 // is set up below, so it has to be defined by the time a game renders.
 import "../UserSettingModal";
+import { FriendsContentOverlay } from "../controllers/FriendsContentOverlay";
 import type { UserSettingModal } from "../UserSettingModal";
 import { UserSettings } from "../UserSettings";
 import { GameView } from "../view";
@@ -333,6 +334,7 @@ export function createRenderer(
   onboardingOverlay.uiState = uiState;
 
   const layers: Controller[] = [
+    new FriendsContentOverlay(game, transformHandler, view),
     new WarshipSelectionController(game, eventBus, transformHandler, view),
     new BuildPreviewController(
       game,
@@ -421,6 +423,7 @@ export class GameRenderer {
   }
 
   dispose() {
+    this.layers.forEach((layer) => layer.onRendererDispose?.());
     window.removeEventListener("resize", this.onResize);
   }
 

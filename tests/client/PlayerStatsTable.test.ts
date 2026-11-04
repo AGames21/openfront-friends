@@ -40,6 +40,8 @@ const stats: PlayerStats = {
     silo: [131n, 132n, 133n, 134n],
     fact: [141n, 142n, 143n, 144n],
     wshp: [151n, 152n, 153n, 154n],
+    afld: [161n, 162n, 163n, 164n],
+    acft: [171n, 172n, 173n, 174n],
   },
 };
 
@@ -168,8 +170,15 @@ describe("PlayerStatsTable", () => {
         text(candidate.querySelector("th")) === "player_stats_table.building",
     );
     expect(buildings, "buildings table should exist").toBeDefined();
-    // The six structures, with the warship row moved to its own section.
-    expect(buildings?.querySelectorAll("tbody tr")).toHaveLength(6);
+    // Airfields are buildings; aircraft and warships have separate sections.
+    expect(buildings?.querySelectorAll("tbody tr")).toHaveLength(7);
+    expect(buildings?.textContent).toContain("unit_type.airfield");
+    expect(buildings?.textContent).not.toContain("unit_type.aircraft");
+    expect(
+      columnsOf(table, "player_stats_table.aircraft_stats")[
+        "player_stats_table.built"
+      ],
+    ).toBe("171");
     expect(buildings?.textContent).not.toContain("unit_type.warship");
 
     expect(columnsOf(table, "player_stats_table.warship_stats")).toEqual({

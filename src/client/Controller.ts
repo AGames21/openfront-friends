@@ -11,6 +11,8 @@
  * draws to a shared canvas, so they're plain controllers.
  */
 export interface Controller {
+  /** Release resources owned by this renderer instance. */
+  onRendererDispose?: () => void;
   /** Called once at game start. Subscribe to events / set up state here. */
   init?: () => void;
 

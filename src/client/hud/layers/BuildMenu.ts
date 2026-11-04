@@ -112,6 +112,13 @@ const buildTable: BuildItemDisplay[][] = [
       countable: true,
     },
     {
+      unitType: UnitType.Airfield,
+      icon: assetUrl("images/AirfieldIcon.svg"),
+      description: "build_menu.desc.airfield",
+      key: "unit_type.airfield",
+      countable: true,
+    },
+    {
       unitType: UnitType.Factory,
       icon: factoryIcon,
       description: "build_menu.desc.factory",

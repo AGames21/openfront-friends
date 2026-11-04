@@ -1613,6 +1613,8 @@ export class PlayerImpl implements Player {
         return this.portSpawn(targetTile, validTiles);
       case UnitType.Warship:
         return this.warshipSpawn(targetTile);
+      case UnitType.Aircraft:
+        return false; // Aircraft are launched by an owned, completed airfield.
       case UnitType.Shell:
       case UnitType.SAMMissile:
         return targetTile;
@@ -1627,6 +1629,7 @@ export class PlayerImpl implements Player {
       case UnitType.SAMLauncher:
       case UnitType.City:
       case UnitType.Factory:
+      case UnitType.Airfield:
         return this.landBasedStructureSpawn(targetTile, validTiles);
       default:
         assertNever(unitType);

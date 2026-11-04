@@ -31,7 +31,9 @@ import { simpleHash } from "@openfront/engine-lib/Util";
 import { EngineConfig } from "./configuration/EngineConfig";
 import { DoomsdayClockExecution } from "./execution/DoomsdayClockExecution";
 import { Executor } from "./execution/ExecutionManager";
+import { FriendsMissionExecution } from "./execution/FriendsMissionExecution";
 import { RecomputeRailClusterExecution } from "./execution/RecomputeRailClusterExecution";
+import { SpawnExecution } from "./execution/SpawnExecution";
 import { SpawnTimerExecution } from "./execution/SpawnTimerExecution";
 import { WinCheckExecution } from "./execution/WinCheckExecution";
 import { Game, Player } from "./game/Game";
@@ -194,6 +196,28 @@ export class GameRunner {
       this.game.addExecution(
         ...this.execManager.spawnTribes(this.game.config().bots()),
       );
+    }
+    if (this.game.config().gameConfig().friendsMode)
+      this.game.addExecution(
+        new FriendsMissionExecution(
+          this.game.config().gameConfig().friendsMode!,
+        ),
+      );
+    if (
+      this.game.config().gameConfig().friendsMode &&
+      this.game.config().gameConfig().gameMap === "Tutorial"
+    ) {
+      for (const human of this.game
+        .allPlayers()
+        .filter((player) => player.type() === PlayerType.Human)) {
+        this.game.addExecution(
+          new SpawnExecution(
+            this.execManager.gameID(),
+            human.info(),
+            this.game.ref(98, 98),
+          ),
+        );
+      }
     }
     this.game.addExecution(new WinCheckExecution());
     if (this.game.config().doomsdayClockConfig().enabled) {

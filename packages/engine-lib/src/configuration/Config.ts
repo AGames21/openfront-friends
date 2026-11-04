@@ -177,6 +177,11 @@ export class Config {
   }
 
   isUnitDisabled(unitType: UnitType): boolean {
+    if (
+      (unitType === UnitType.Airfield || unitType === UnitType.Aircraft) &&
+      !this._gameConfig.friendsAircraft
+    )
+      return true;
     return this._gameConfig.disabledUnits?.includes(unitType) ?? false;
   }
   instantBuild(): boolean {
@@ -211,6 +216,12 @@ export class Config {
 
     let info: UnitInfo;
     switch (type) {
+      case UnitType.Airfield:
+        info = { constructionDuration: this.instantBuild() ? 0 : 100 };
+        break;
+      case UnitType.Aircraft:
+        info = { maxHealth: 300 };
+        break;
       case UnitType.Warship:
         info = { maxHealth: 1000 };
         break;

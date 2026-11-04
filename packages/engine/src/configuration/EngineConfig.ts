@@ -338,6 +338,10 @@ export class EngineConfig extends Config {
 
   private unitCost(type: UnitType): EngineUnitInfo["cost"] {
     switch (type) {
+      case UnitType.Airfield:
+        return this.costWrapper(() => 750_000, UnitType.Airfield);
+      case UnitType.Aircraft:
+        return () => 0n;
       case UnitType.Warship:
         return this.costWrapper(
           (numUnits: number) => Math.min(1_000_000, (numUnits + 1) * 250_000),

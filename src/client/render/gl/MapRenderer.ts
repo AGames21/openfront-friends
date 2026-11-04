@@ -36,6 +36,10 @@ import { GPURenderer } from "./Renderer";
 import type { RenderSettings } from "./RenderSettings";
 
 export class MapRenderer {
+  private friendsGhost: GhostPreviewData | null = null;
+  getGhostPreview(): GhostPreviewData | null {
+    return this.friendsGhost;
+  }
   private renderer: GPURenderer | null = null;
   private resizeObs: ResizeObserver | null = null;
   // Stored layer data for context-restore re-creation.
@@ -285,6 +289,7 @@ export class MapRenderer {
 
   /** Update ghost structure preview (build-mode visualization). null = clear. */
   updateGhostPreview(data: GhostPreviewData | null): void {
+    this.friendsGhost = data;
     this.renderer?.updateGhostPreview(data);
   }
 

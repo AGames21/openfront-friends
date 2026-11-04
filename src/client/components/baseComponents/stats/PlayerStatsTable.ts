@@ -12,9 +12,10 @@ import { translateText } from "../../../Utils";
 // Display order for the buildings table. Declared as a Record rather than a
 // bare array so `satisfies` fails compilation when a structure is added to
 // `otherUnits` without being placed here — a standalone type-level assertion
-// would trip no-unused-vars. "wshp" is the one deliberate omission: warships
-// are not buildings and have their own section below.
+// would trip no-unused-vars. Warships and aircraft are mobile units and
+// have their own sections below.
 const BUILDING_ORDER = {
+  afld: 7,
   city: 1,
   port: 2,
   fact: 3,
@@ -22,7 +23,7 @@ const BUILDING_ORDER = {
   silo: 5,
   saml: 6,
 } as const satisfies Record<
-  Exclude<(typeof otherUnits)[number], "wshp">,
+  Exclude<(typeof otherUnits)[number], "wshp" | "acft">,
   number
 >;
 
@@ -36,6 +37,8 @@ const buildingUnits = (
 // MIRV warheads are stats-only rows and keep their own keys. `satisfies` fails
 // compilation if a new stat unit lands without a label.
 const UNIT_LABEL_KEYS = {
+  afld: "unit_type.airfield",
+  acft: "unit_type.aircraft",
   city: "unit_type.city",
   defp: "unit_type.defense_post",
   fact: "unit_type.factory",
@@ -174,6 +177,9 @@ export class PlayerStatsTable extends LitElement {
           })),
           "player_stats_table.building",
         )}
+        ${statsSection("player_stats_table.aircraft_stats", UNIT_COLUMNS, [
+          { values: slots(stats?.units?.acft, 4) },
+        ])}
         ${statsSection("player_stats_table.warship_stats", UNIT_COLUMNS, [
           { values: slots(stats?.units?.wshp, 4) },
         ])}

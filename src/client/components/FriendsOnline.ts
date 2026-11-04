@@ -35,9 +35,14 @@ import type { FriendsSession } from "../FriendsRelay";
 import type { JoinLobbyEvent } from "../Main";
 import "./FriendsPartyLobby";
 
-type ListedRoom = { id: string; name: string; hostName: string; createdAt: number };
+type ListedRoom = {
+  id: string;
+  name: string;
+  hostName: string;
+  createdAt: number;
+};
 type Member = { uid: string; clientID: string; name: string };
-const VERSION = "friends-v2-20261103";
+const VERSION = "friends-v3-content-20261104";
 export const MATCH_WAIT_MS = 20_000;
 export function normalMatch(
   gameID: string,
@@ -53,6 +58,7 @@ export function normalMatch(
       clanTag: null,
     })),
     config: {
+      friendsAircraft: true,
       gameMap: GameMapType.World,
       gameMapSize: GameMapSize.Compact,
       gameType: online ? GameType.Private : GameType.Singleplayer,
@@ -74,6 +80,8 @@ export function normalMatch(
 @customElement("friends-online")
 export class FriendsOnline extends LitElement {
   @state() private opened = false;
+  @state() private roomActivity: "standard" | "survival" | "capture" =
+    "standard";
   @state() private user: User | null = null;
   @state() private busy = false;
   @state() private status = "";
@@ -88,9 +96,18 @@ export class FriendsOnline extends LitElement {
   private watchServers() {
     this.directoryOff?.();
     if (!this.opened || !this.user) return;
-    this.directoryOff = onValue(ref(friendsDB, `servers/${VERSION}`), snap => {
-      this.servers = Object.entries(snap.val() ?? {}).map(([id, v]) => ({id, ...(v as Omit<ListedRoom,"id">)})).filter(v => Date.now()-v.createdAt < 300000).sort((a,b)=>b.createdAt-a.createdAt);
-    }, () => { this.status = "Server list unavailable. Try again shortly."; });
+    this.directoryOff = onValue(
+      ref(friendsDB, `servers/${VERSION}`),
+      (snap) => {
+        this.servers = Object.entries(snap.val() ?? {})
+          .map(([id, v]) => ({ id, ...(v as Omit<ListedRoom, "id">) }))
+          .filter((v) => Date.now() - v.createdAt < 300000)
+          .sort((a, b) => b.createdAt - a.createdAt);
+      },
+      () => {
+        this.status = "Server list unavailable. Try again shortly.";
+      },
+    );
   }
   @state() private displayName = "";
   @state() private savedDisplayName = "";
@@ -110,7 +127,9 @@ export class FriendsOnline extends LitElement {
       this.savedDisplayName = "";
       this.nameLoading = Boolean(u);
       if (u) void this.loadDisplayName(u);
-      this.directoryOff?.(); this.servers=[]; this.watchServers();
+      this.directoryOff?.();
+      this.servers = [];
+      this.watchServers();
     });
     document.addEventListener("friends-online-error", this.matchError);
     document.addEventListener("friends-online-notice", this.matchNotice);
@@ -133,7 +152,8 @@ export class FriendsOnline extends LitElement {
     this.status = (e as CustomEvent<string>).detail;
     this.opened = true;
   };
-  open() {
+  open(activity: "standard" | "survival" | "capture" = "standard") {
+    this.roomActivity = activity;
     this.opened = true;
     this.status = "";
     this.watchServers();
@@ -228,9 +248,15 @@ export class FriendsOnline extends LitElement {
       }),
     );
   }
-  private async matchmaking(mode: "quick" | "public" | "private" | "join" = "quick", requested = "") {
+  private async matchmaking(
+    mode: "quick" | "public" | "private" | "join" = "quick",
+    requested = "",
+  ) {
     if (!this.user || this.busy || this.nameLoading) return;
-    if (mode === "join" && !/^[A-Za-z0-9_-]{1,30}$/.test(requested.trim())) {this.status="Enter a valid room code.";return;}
+    if (mode === "join" && !/^[A-Za-z0-9_-]{1,30}$/.test(requested.trim())) {
+      this.status = "Enter a valid room code.";
+      return;
+    }
     if (!this.savedDisplayName) {
       this.status = "Choose and save a display name before joining a match.";
       return;
@@ -279,8 +305,12 @@ export class FriendsOnline extends LitElement {
     };
     this.cancelQueue = abort;
     try {
-      const entries = mode === "quick" ? await get(ref(friendsDB, `queue/${VERSION}`)) : null;
-      const candidates = mode === "join" ? [{ roomID: requested.trim(), createdAt: Date.now() }] : Object.values(entries?.val() ?? {});
+      const entries =
+        mode === "quick" ? await get(ref(friendsDB, `queue/${VERSION}`)) : null;
+      const candidates =
+        mode === "join"
+          ? [{ roomID: requested.trim(), createdAt: Date.now() }]
+          : Object.values(entries?.val() ?? {});
       if (done) return;
       for (const item of candidates as {
         roomID: string;
@@ -290,7 +320,12 @@ export class FriendsOnline extends LitElement {
         const meta = (
           await get(ref(friendsDB, `rooms/${item.roomID}/meta`))
         ).val();
-        if (!meta || meta.host.uid === me.uid || (mode === "join" && meta.version !== VERSION)) continue;
+        if (
+          !meta ||
+          meta.host.uid === me.uid ||
+          (mode === "join" && meta.version !== VERSION)
+        )
+          continue;
         // Only one guest can claim this room. Host timeout races this same node.
         const claim = await runTransaction(
           ref(friendsDB, `rooms/${item.roomID}/guest`),
@@ -330,7 +365,7 @@ export class FriendsOnline extends LitElement {
         version: VERSION,
         visibility: mode === "private" ? "private" : "public",
         named: mode !== "quick",
-        name: (this.roomName.trim() || `${me.name}'s room`).slice(0,40),
+        name: (this.roomName.trim() || `${me.name}'s room`).slice(0, 40),
       });
       await onDisconnect(ref(friendsDB, `rooms/${roomID}`)).remove();
       await onDisconnect(queue).remove();
@@ -341,7 +376,11 @@ export class FriendsOnline extends LitElement {
         if (mode === "public") {
           const listing = ref(friendsDB, `servers/${VERSION}/${roomID}`);
           await onDisconnect(listing).remove();
-          await set(listing, { name: (this.roomName.trim() || `${me.name}'s room`).slice(0,40), hostName: me.name, createdAt });
+          await set(listing, {
+            name: (this.roomName.trim() || `${me.name}'s room`).slice(0, 40),
+            hostName: me.name,
+            createdAt,
+          });
         }
       }
       off = onValue(
@@ -371,120 +410,222 @@ export class FriendsOnline extends LitElement {
       );
       // A queue subscription also handles two people searching at the same instant.
       // The larger room id yields, so only one side attempts the transfer.
-      queueOff = mode === "quick" ? onValue(
-        ref(friendsDB, `queue/${VERSION}`),
-        async (snapshot) => {
-          if (done || swapping) return;
-          const other = (
-            Object.values(snapshot.val() ?? {}) as {
-              roomID: string;
-              createdAt: number;
-            }[]
-          ).find((x) => x.roomID < roomID && Date.now() - x.createdAt < 25000);
-          if (!other) return;
-          swapping = true;
-          try {
-            const reserved = await runTransaction(
-              ref(friendsDB, `rooms/${roomID}/guest`),
-              (x) =>
-                x === null
-                  ? { uid: "closed", clientID: "closed", name: "closed" }
-                  : undefined,
-            );
-            if (!reserved.committed || done) return;
-            off();
-            queueOff();
-            clearInterval(interval);
-            clearTimeout(timeout);
-            const previousRoom = roomID;
-            await remove(queue);
-            await remove(ref(friendsDB, `rooms/${previousRoom}`));
-            ownRoom = false;
-            roomID = other.roomID;
-            const meta = (
-              await get(ref(friendsDB, `rooms/${roomID}/meta`))
-            ).val();
-            const claimed = await runTransaction(
-              ref(friendsDB, `rooms/${roomID}/guest`),
-              (x) => (x === null ? me : undefined),
-            );
-            if (!claimed.committed || !meta) {
-              done = true;
-              await clean();
-              this.busy = false;
-              void this.matchmaking();
-              return;
-            }
-            this.status = "Player found! Preparing the world...";
-            off = onValue(ref(friendsDB, `rooms/${roomID}/start`), (x) => {
-              if (!x.exists() || done) return;
-              done = true;
-              void clean();
-              this.launch(JSON.parse(x.val()), me, {
-                roomID,
-                uid: me.uid,
-                hostUID: meta.host.uid,
-                guestUID: me.uid,
-                clientID: me.clientID,
-              });
-            });
-            timeout = setTimeout(() => {
-              if (done) return;
-              done = true;
-              void clean();
-              this.busy = false;
-              this.status = "The host did not start. Please search again.";
-            }, 30000);
-          } catch {
-            if (!done) {
-              done = true;
-              await clean().catch(() => {});
-              this.busy = false;
-              this.status = "Connection interrupted. Please search again.";
-            }
-          }
-        },
-      ) : () => {};
+      queueOff =
+        mode === "quick"
+          ? onValue(ref(friendsDB, `queue/${VERSION}`), async (snapshot) => {
+              if (done || swapping) return;
+              const other = (
+                Object.values(snapshot.val() ?? {}) as {
+                  roomID: string;
+                  createdAt: number;
+                }[]
+              ).find(
+                (x) => x.roomID < roomID && Date.now() - x.createdAt < 25000,
+              );
+              if (!other) return;
+              swapping = true;
+              try {
+                const reserved = await runTransaction(
+                  ref(friendsDB, `rooms/${roomID}/guest`),
+                  (x) =>
+                    x === null
+                      ? { uid: "closed", clientID: "closed", name: "closed" }
+                      : undefined,
+                );
+                if (!reserved.committed || done) return;
+                off();
+                queueOff();
+                clearInterval(interval);
+                clearTimeout(timeout);
+                const previousRoom = roomID;
+                await remove(queue);
+                await remove(ref(friendsDB, `rooms/${previousRoom}`));
+                ownRoom = false;
+                roomID = other.roomID;
+                const meta = (
+                  await get(ref(friendsDB, `rooms/${roomID}/meta`))
+                ).val();
+                const claimed = await runTransaction(
+                  ref(friendsDB, `rooms/${roomID}/guest`),
+                  (x) => (x === null ? me : undefined),
+                );
+                if (!claimed.committed || !meta) {
+                  done = true;
+                  await clean();
+                  this.busy = false;
+                  void this.matchmaking();
+                  return;
+                }
+                this.status = "Player found! Preparing the world...";
+                off = onValue(ref(friendsDB, `rooms/${roomID}/start`), (x) => {
+                  if (!x.exists() || done) return;
+                  done = true;
+                  void clean();
+                  this.launch(JSON.parse(x.val()), me, {
+                    roomID,
+                    uid: me.uid,
+                    hostUID: meta.host.uid,
+                    guestUID: me.uid,
+                    clientID: me.clientID,
+                  });
+                });
+                timeout = setTimeout(() => {
+                  if (done) return;
+                  done = true;
+                  void clean();
+                  this.busy = false;
+                  this.status = "The host did not start. Please search again.";
+                }, 30000);
+              } catch {
+                if (!done) {
+                  done = true;
+                  await clean().catch(() => {});
+                  this.busy = false;
+                  this.status = "Connection interrupted. Please search again.";
+                }
+              }
+            })
+          : () => {};
       interval = setInterval(() => {
         this.seconds = Math.max(0, this.seconds - 1);
       }, 1000);
-      timeout = setTimeout(async () => {
-        // Reserve the empty guest slot before fallback, preventing a late join.
-        const claim = await runTransaction(
-          ref(friendsDB, `rooms/${roomID}/guest`),
-          (x) =>
-            x === null
-              ? { uid: "closed", clientID: "closed", name: "closed" }
-              : undefined,
-        );
-        if (!claim.committed || done) return;
-        done = true;
-        await clean();
-        await remove(ref(friendsDB, `rooms/${roomID}`));
-        this.launch(normalMatch(generateID(), [me], false), me);
-        this.notice = "No players joined. Starting a Normal AI match.";
-        setTimeout(() => {
-          this.notice = "";
-        }, 10000);
-      }, mode === "quick" ? MATCH_WAIT_MS : 300000);
+      timeout = setTimeout(
+        async () => {
+          // Reserve the empty guest slot before fallback, preventing a late join.
+          const claim = await runTransaction(
+            ref(friendsDB, `rooms/${roomID}/guest`),
+            (x) =>
+              x === null
+                ? { uid: "closed", clientID: "closed", name: "closed" }
+                : undefined,
+          );
+          if (!claim.committed || done) return;
+          done = true;
+          await clean();
+          await remove(ref(friendsDB, `rooms/${roomID}`));
+          this.launch(normalMatch(generateID(), [me], false), me);
+          this.notice = "No players joined. Starting a Normal AI match.";
+          setTimeout(() => {
+            this.notice = "";
+          }, 10000);
+        },
+        mode === "quick" ? MATCH_WAIT_MS : 300000,
+      );
     } catch (e) {
       done = true;
       await clean().catch(() => {});
-      if (ownRoom && roomID) await remove(ref(friendsDB, `rooms/${roomID}`)).catch(() => {});
+      if (ownRoom && roomID)
+        await remove(ref(friendsDB, `rooms/${roomID}`)).catch(() => {});
       this.busy = false;
       this.status =
-        mode === "join" ? "This room is full, expired or unavailable." : "Could not reach matchmaking. Check your connection and try again.";
+        mode === "join"
+          ? "This room is full, expired or unavailable."
+          : "Could not reach matchmaking. Check your connection and try again.";
       console.error("Matchmaking failed", e);
     }
   }
   private renderServers() {
     const disabled = this.busy || this.nameLoading || !this.savedDisplayName;
-    return html`<div class="server-browser"><div class="server-heading"><h3>Public servers</h3><button ?disabled=${this.busy} @click=${() => this.watchServers()}>Refresh</button></div>
-      <p class="online-help">World map · Normal AI · 2 players + AI. Matches start when someone joins.</p>
-      <div class="server-list">${this.servers.length ? this.servers.map(room => html`<div class="server-row"><div><strong>${room.name}</strong><small>${room.hostName} · 1 / 2 players</small></div><button ?disabled=${disabled} @click=${() => this.matchmaking("join", room.id)}>Join</button></div>`) : html`<p class="server-empty">No open servers. Host one below or use Quick play.</p>`}</div>
-      <div class="server-create"><h3>Host a server</h3><label>Server name<input maxlength="40" placeholder="Friday night" ?disabled=${this.busy} .value=${this.roomName} @input=${(e: Event) => this.roomName=(e.target as HTMLInputElement).value}></label><label>Visibility<select ?disabled=${this.busy} .value=${this.visibility} @change=${(e: Event) => this.visibility=(e.target as HTMLSelectElement).value}><option value="public">Public — listed for everyone</option><option value="private">Private — room code only</option></select></label><button ?disabled=${disabled} @click=${() => this.matchmaking(this.visibility === "private" ? "private" : "public")}>Create server</button>
-      ${this.hostingCode ? html`<p class="room-code">Room code <strong>${this.hostingCode}</strong><button @click=${() => navigator.clipboard.writeText(this.hostingCode).then(()=>this.status="Code copied.").catch(()=>this.status="Select and copy the room code above.")}>Copy</button></p><small>Waiting up to five minutes, then starting with Normal AI.</small>` : html``}
-      </div><form class="server-code-form" @submit=${(e: Event) => {e.preventDefault(); void this.matchmaking("join", this.joinCode);}}><label>Join a private server<input required maxlength="30" placeholder="Room code" ?disabled=${this.busy} @input=${(e: Event) => this.joinCode=(e.target as HTMLInputElement).value.trim()}></label><button ?disabled=${disabled}>Join by code</button></form></div>`;
+    return html`<div class="server-browser">
+      <div class="server-heading">
+        <h3>Public servers</h3>
+        <button ?disabled=${this.busy} @click=${() => this.watchServers()}>
+          Refresh
+        </button>
+      </div>
+      <p class="online-help">
+        World map · Normal AI · 2 players + AI. Matches start when someone
+        joins.
+      </p>
+      <div class="server-list">
+        ${
+          this.servers.length
+            ? this.servers.map(
+                (room) =>
+                  html`<div class="server-row">
+                    <div>
+                      <strong>${room.name}</strong
+                      ><small>${room.hostName} · 1 / 2 players</small>
+                    </div>
+                    <button
+                      ?disabled=${disabled}
+                      @click=${() => this.matchmaking("join", room.id)}
+                    >
+                      Join
+                    </button>
+                  </div>`,
+              )
+            : html`<p class="server-empty">
+                No open servers. Host one below or use Quick play.
+              </p>`
+        }
+      </div>
+      <div class="server-create">
+        <h3>Host a server</h3>
+        <label
+          >Server name<input
+            maxlength="40"
+            placeholder="Friday night"
+            ?disabled=${this.busy}
+            .value=${this.roomName}
+            @input=${(e: Event) => (this.roomName = (e.target as HTMLInputElement).value)} /></label
+        ><label
+          >Visibility<select
+            ?disabled=${this.busy}
+            .value=${this.visibility}
+            @change=${(e: Event) => (this.visibility = (e.target as HTMLSelectElement).value)}
+          >
+            <option value="public">Public — listed for everyone</option>
+            <option value="private">Private — room code only</option>
+          </select></label
+        ><button
+          ?disabled=${disabled}
+          @click=${() => this.matchmaking(this.visibility === "private" ? "private" : "public")}
+        >
+          Create server
+        </button>
+        ${
+          this.hostingCode
+            ? html`<p class="room-code">
+                  Room code <strong>${this.hostingCode}</strong
+                  ><button
+                    @click=${() =>
+                      navigator.clipboard
+                        .writeText(this.hostingCode)
+                        .then(() => (this.status = "Code copied."))
+                        .catch(
+                          () =>
+                            (this.status =
+                              "Select and copy the room code above."),
+                        )}
+                  >
+                    Copy
+                  </button>
+                </p>
+                <small
+                  >Waiting up to five minutes, then starting with Normal
+                  AI.</small
+                >`
+            : html``
+        }
+      </div>
+      <form
+        class="server-code-form"
+        @submit=${(e: Event) => {
+          e.preventDefault();
+          void this.matchmaking("join", this.joinCode);
+        }}
+      >
+        <label
+          >Join a private server<input
+            required
+            maxlength="30"
+            placeholder="Room code"
+            ?disabled=${this.busy}
+            @input=${(e: Event) => (this.joinCode = (e.target as HTMLInputElement).value.trim())} /></label
+        ><button ?disabled=${disabled}>Join by code</button>
+      </form>
+    </div>`;
   }
   render() {
     if (!this.opened)
@@ -493,16 +634,39 @@ export class FriendsOnline extends LitElement {
             ${this.notice}
           </div>`
         : html``;
+    const nameForm = html`<form
+      class="fo-name-form"
+      @submit=${(event: Event) => {
+        event.preventDefault();
+        void this.saveDisplayName();
+      }}
+    >
+      <label
+        >Display name<input
+          required
+          minlength="2"
+          maxlength="20"
+          autocomplete="nickname"
+          placeholder="Your commander name"
+          .value=${this.displayName}
+          ?disabled=${this.busy || this.nameLoading}
+          @input=${(event: Event) => (this.displayName = (event.target as HTMLInputElement).value)} /></label
+      ><button
+        ?disabled=${this.busy || this.nameLoading || this.displayName === this.savedDisplayName}
+      >
+        Save name
+      </button>
+    </form>`;
     return html`<div class="friends-online-backdrop">
       <section
-        class="friends-online-panel"
+        class="friends-online-panel fo-panel"
         role="dialog"
         aria-modal="true"
         aria-label="Multiplayer and account"
       >
-        <div class="command-sectionhead">
+        <header class="fo-header">
           <div>
-            <span class="command-kicker">OPENFRONT</span>
+            <span class="fh-eyebrow">BRING YOUR FRIENDS</span>
             <h2>Multiplayer</h2>
           </div>
           <button
@@ -515,134 +679,131 @@ export class FriendsOnline extends LitElement {
           >
             Close
           </button>
-        </div>
+        </header>
         ${
           this.user
-            ? html`<p>
-                  ${this.savedDisplayName ? html`Playing as <strong>${this.savedDisplayName}</strong>` : "You're signed in. Choose a display name below."}
-                </p>
-                <form
-                  @submit=${(e: Event) => {
-                    e.preventDefault();
-                    void this.saveDisplayName();
-                  }}
-                >
-                  <label
-                    >Display name<input
-                      type="text"
-                      autocomplete="nickname"
-                      minlength="2"
-                      maxlength="20"
-                      required
-                      placeholder="Map Master"
-                      .value=${this.displayName}
-                      ?disabled=${this.busy || this.nameLoading}
-                      @input=${(e: Event) => {
-                        this.displayName = (e.target as HTMLInputElement).value;
-                      }}
-                  /></label>
-                  <p class="online-help">
-                    ${this.nameLoading ? "Loading your game profile…" : "Choose the name other players see. Use 2–20 letters, numbers, spaces, underscores or hyphens."}
-                  </p>
-                  <button
-                    type="submit"
-                    ?disabled=${this.busy || this.nameLoading || this.displayName === this.savedDisplayName}
+            ? html`
+                <div class="fo-account">
+                  <span
+                    >${this.savedDisplayName ? html`Playing as <strong>${this.savedDisplayName}</strong>` : "Choose your display name to join a room."}</span
+                  ><button
+                    ?disabled=${this.busy}
+                    @click=${() => this.action(() => signOut(friendsAuth))}
                   >
-                    Save display name
+                    Sign out
                   </button>
-                </form>
+                </div>
+                ${
+                  this.savedDisplayName
+                    ? html`<details class="fo-name-edit">
+                        <summary>Edit display name</summary>
+                        ${nameForm}
+                      </details>`
+                    : nameForm
+                }
                 <friends-party-lobby
                   .uid=${this.user.uid}
                   .displayName=${this.savedDisplayName}
-                  @party-launch=${() => { this.opened = false; this.directoryOff?.(); }}
+                  .activity=${this.roomActivity}
+                  @party-launch=${() => {
+                    this.opened = false;
+                    this.directoryOff?.();
+                  }}
                 ></friends-party-lobby>
-                ${this.renderServers()}
+                <details class="fo-classic" ?open=${this.busy}>
+                  <summary>Quick play & classic servers</summary>
+                  ${this.renderServers()}
+                  <div class="fo-quick">
+                    <button
+                      class="fo-primary"
+                      ?disabled=${this.busy || this.nameLoading || !this.savedDisplayName}
+                      @click=${() => this.matchmaking()}
+                    >
+                      ${this.busy ? `Waiting · ${this.seconds}s` : "Quick play"}</button
+                    ><button
+                      ?disabled=${!this.cancelQueue}
+                      @click=${() => this.cancelQueue?.()}
+                    >
+                      Leave waiting room
+                    </button>
+                  </div>
+                  <small
+                    >Quick play searches for 20 seconds, then starts a Normal AI
+                    game if nobody joins.</small
+                  >
+                </details>
+              `
+            : html`
+                <div class="fo-auth-intro">
+                  <h3>Your next match starts here.</h3>
+                  <p>
+                    Sign in to create a room or join your friends. Solo and
+                    missions are available without an account.
+                  </p>
+                </div>
                 <button
-                  class="command-deploy"
-                  ?disabled=${this.busy || this.nameLoading || !this.savedDisplayName}
-                  @click=${() => this.matchmaking()}
-                >
-                  ${this.busy ? `Waiting · ${this.seconds}s` : "Quick play"}
-                </button>
-                <p class="online-help">
-                  We'll look for another player for 20 seconds. If nobody joins,
-                  you'll play against Normal AI. Five-minute border protection
-                  gives everyone time to build.
-                </p>
-                <button
-                  ?disabled=${!this.cancelQueue}
-                  @click=${() => this.cancelQueue?.()}
-                >
-                  Leave waiting room</button
-                ><button
-                  ?disabled=${this.busy}
-                  @click=${() => this.action(() => signOut(friendsAuth))}
-                >
-                  Sign out
-                </button>`
-            : html` <p>
-                  Sign in to find other players. Solo stays available without an
-                  account.
-                </p>
-                <button
-                  class="command-deploy"
+                  class="fo-primary fo-google"
                   ?disabled=${this.busy}
                   @click=${() => this.action(() => signInWithPopup(friendsAuth, new GoogleAuthProvider()))}
                 >
-                  Continue with Google
+                  Continue with Google <span aria-hidden="true">↗</span>
                 </button>
-                <form
-                  @submit=${(e: Event) => {
-                    e.preventDefault();
-                    void this.emailAuth();
-                  }}
-                >
-                  <label
-                    >Email<input
-                      type="email"
-                      autocomplete="email"
-                      required
-                      @input=${(e: Event) => {
-                        this.email = (e.target as HTMLInputElement).value;
-                      }}
-                  /></label>
-                  <label
-                    >Password<input
-                      type="password"
-                      autocomplete="current-password"
-                      minlength="6"
-                      required
-                      .value=${this.password}
-                      @input=${(e: Event) => {
-                        this.password = (e.target as HTMLInputElement).value;
-                      }}
-                  /></label>
-                  <div class="online-buttons">
-                    <button type="submit" ?disabled=${this.busy}>Sign in</button
-                    ><button
-                      type="button"
-                      ?disabled=${this.busy}
-                      @click=${() => this.emailAuth(true)}
-                    >
-                      Create account</button
-                    ><button
-                      type="button"
-                      ?disabled=${this.busy}
-                      @click=${() =>
-                        this.action(async () => {
-                          await sendPasswordResetEmail(friendsAuth, this.email);
-                          this.status = "Password reset email sent.";
-                        })}
-                    >
-                      Reset password
-                    </button>
-                  </div>
-                </form>`
+                <details class="fo-email">
+                  <summary>Use email instead</summary>
+                  <form
+                    @submit=${(event: Event) => {
+                      event.preventDefault();
+                      void this.emailAuth();
+                    }}
+                  >
+                    <div class="fo-email-fields">
+                      <label
+                        >Email<input
+                          type="email"
+                          autocomplete="email"
+                          required
+                          @input=${(event: Event) => (this.email = (event.target as HTMLInputElement).value)} /></label
+                      ><label
+                        >Password<input
+                          type="password"
+                          autocomplete="current-password"
+                          required
+                          minlength="6"
+                          .value=${this.password}
+                          @input=${(event: Event) => (this.password = (event.target as HTMLInputElement).value)}
+                      /></label>
+                    </div>
+                    <div class="online-buttons">
+                      <button ?disabled=${this.busy}>Sign in</button
+                      ><button
+                        type="button"
+                        ?disabled=${this.busy}
+                        @click=${() => this.emailAuth(true)}
+                      >
+                        Create account</button
+                      ><button
+                        type="button"
+                        ?disabled=${this.busy}
+                        @click=${() =>
+                          this.action(async () => {
+                            await sendPasswordResetEmail(
+                              friendsAuth,
+                              this.email,
+                            );
+                            this.status = "Password reset email sent.";
+                          })}
+                      >
+                        Reset password
+                      </button>
+                    </div>
+                  </form>
+                </details>
+              `
         }
-        <p role="status" aria-live="polite">${this.status}</p>
-        <small
-          >Casual peer-hosted matches. Keep this tab open while playing.</small
-        >
+        <p class="fo-status" role="status" aria-live="polite">${this.status}</p>
+        <footer class="fo-footer">
+          Private, peer-hosted matches. Keep the host's tab open.
+        </footer>
       </section>
     </div>`;
   }

@@ -17,6 +17,7 @@ const DISABLED_UNIT_KEYS: Record<string, string> = {
   City: "unit_type.city",
   Port: "unit_type.port",
   "Defense Post": "unit_type.defense_post",
+  Airfield: "unit_type.airfield",
   "SAM Launcher": "unit_type.sam_launcher",
   "Missile Silo": "unit_type.missile_silo",
   Warship: "unit_type.warship",

@@ -17,10 +17,12 @@ import "./FriendsWorldStatus";
 import "./friends-command.css";
 import "./friends-arcade.css";
 import "./friends-lobby.css";
+import "./friends-home.css";
 
 @customElement("friends-welcome")
 export class FriendsWelcome extends LitElement {
   @state() private selected = preferredSoloDifficulty();
+  @state() private page: "home" | "missions" = "home";
   @state() private muted = false;
   @state() private savedAt = 0;
   @state() private saveError = false;
@@ -73,6 +75,7 @@ export class FriendsWelcome extends LitElement {
       "friends-difficulty-change",
       this.syncDifficulty,
     );
+    document.removeEventListener("friends-save-status", this.saveStatus);
     super.disconnectedCallback();
   }
   private saveStatus = (e: Event) => {
@@ -83,13 +86,6 @@ export class FriendsWelcome extends LitElement {
   private async resume() {
     const saves = await import("../FriendsSaves");
     await saves.resumeCampaign();
-  }
-  private testSound() {
-    if (this.settings.audioVolume("master") === 0) {
-      this.settings.setAudioVolume("master", 0.7);
-      this.muted = false;
-    }
-    playCue("game-start");
   }
   private hover() {
     if (performance.now() - this.lastHover > 120) {
@@ -140,88 +136,127 @@ export class FriendsWelcome extends LitElement {
       playCue("click");
     }
   }
+  private async missions() {
+    this.page = "missions";
+    await import("./FriendsMissions");
+  }
   render() {
-    const hosted = process.env.FRIENDS_STATIC === "true";
-    return html` <section
-      class="command-center"
-      aria-label="OpenFront command center"
-    >
-      <div class="command-topline">
-        <span class="command-status"><i></i> AG / OPENFRONT</span>
-        <button
-          class="command-audio"
+    return html`<section class="friends-home" aria-label="OpenFront home">
+      <header class="fh-header">
+        <button class="fh-brand" @click=${() => (this.page = "home")}>
+          <span aria-hidden="true">◈</span> OPENFRONT
+          <small>FRIENDS EDITION</small></button
+        ><button
+          class="fh-icon-button"
           @click=${this.toggleSound}
           aria-label=${this.muted ? "Enable sound" : "Mute sound"}
           aria-pressed=${this.muted}
         >
-          ${commandIcon("sound")} ${this.muted ? "SOUND OFF" : "SOUND ON"}
+          ${commandIcon("sound")}<span
+            >${this.muted ? "Sound off" : "Sound on"}</span
+          >
         </button>
-      </div>
-      <div class="command-hero">
-        <div class="command-copy">
-          <span class="command-kicker">FRIENDS EDITION</span>
-          <h1>OpenFront<span>Build your nation.</span></h1>
-          <p>
-            Choose a solo game or find a server.
-          </p>
-          <div class="command-actions">
-            ${this.savedAt ? html`<button class="command-secondary" @click=${this.resume}>Continue saved world</button>` : html``}
-            <button
-              class="command-deploy"
-              @pointerenter=${this.hover}
-              @click=${() => this.open("single-player-modal")}
-            >
-              ${commandIcon("play")} PLAY SOLO ${commandIcon("arrow")}
-            </button>
-            ${hosted ? html`<button class="command-secondary" @click=${this.online}>Multiplayer ${commandIcon("arrow")}</button>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
-          </div>
-        </div>
-      </div>
-      <div class="command-sectionhead">
-        <div>
-          <span class="command-kicker">SOLO</span>
-          <h2>Difficulty</h2>
-        </div>
-        <span class="command-difficulty-note"
-          >Your selection is saved</span
-        >
-      </div>
-      <div
-        class="command-difficulties"
-        role="group"
-        aria-label="Solo difficulty"
-      >
-        ${soloPresets.map(
-          (preset, index) =>
-            html`<button
-              class="command-difficulty ${this.selected === preset.difficulty ? "selected" : ""}"
-              style=${`--rank-color:${preset.color}`}
-              aria-pressed=${this.selected === preset.difficulty}
-              @pointerenter=${this.hover}
-              @click=${() => this.choose(preset.difficulty)}
-            >
-              <div class="command-rankicon">
-                ${commandIcon(preset.icon)}<span>0${index + 1}</span>
+      </header>
+      ${
+        this.page === "missions"
+          ? html`<div class="fh-missions">
+              <button class="fh-back" @click=${() => (this.page = "home")}>
+                ← Back to home</button
+              ><friends-missions
+                .difficulty=${this.selected}
+              ></friends-missions>
+            </div>`
+          : html`
+              <div class="fh-intro">
+                <span class="fh-eyebrow">YOUR WORLD. YOUR STRATEGY.</span>
+                <h1>Make your next move.</h1>
+                <p>
+                  Build a nation, bring your friends, or take on a new
+                  challenge.
+                </p>
               </div>
-              <span class="command-rank">${preset.rank}</span
-              ><strong>${preset.name}</strong>
-              <p>${preset.description}</p>
-              <span class="command-bars" aria-hidden="true"
-                >${[0, 1, 2, 3].map((i) => html`<i class=${i <= index ? "lit" : ""}></i>`)}</span
-              >
-            </button>`,
-        )}
-      </div>
-      <p class="command-save-note">
-        ${this.saveError ? "Saving is unavailable. Check that this browser allows site storage." : "Autosaved on this device."}
-        ${this.savedAt ? `Last saved ${new Date(this.savedAt).toLocaleString()}` : ""}
-      </p>
-      <div class="command-credits">
-        © OpenFront and Contributors · Independent fork ·
-        <a href="https://github.com/AGames21/openfront-friends"
-          >Source & credits</a
+              <div class="fh-play-grid">
+                <button
+                  class="fh-play-card fh-primary"
+                  @pointerenter=${this.hover}
+                  @click=${() => this.open("single-player-modal")}
+                >
+                  <span class="fh-card-icon">${commandIcon("flag")}</span
+                  ><span class="fh-card-copy"
+                    ><small>AT YOUR PACE</small><strong>Solo</strong
+                    ><span>A world of your own.</span></span
+                  ><span class="fh-card-arrow">${commandIcon("arrow")}</span>
+                </button>
+                <button
+                  class="fh-play-card"
+                  @pointerenter=${this.hover}
+                  @click=${this.online}
+                >
+                  <span class="fh-card-icon">${commandIcon("swords")}</span
+                  ><span class="fh-card-copy"
+                    ><small>BETTER TOGETHER</small><strong>Multiplayer</strong
+                    ><span>Team up. Take on the world.</span></span
+                  ><span class="fh-card-arrow">${commandIcon("arrow")}</span>
+                </button>
+                <button
+                  class="fh-play-card"
+                  @pointerenter=${this.hover}
+                  @click=${this.missions}
+                >
+                  <span class="fh-card-icon">${commandIcon("shield")}</span
+                  ><span class="fh-card-copy"
+                    ><small>SOMETHING DIFFERENT</small><strong>Missions</strong
+                    ><span>Fresh challenges. Clear goals.</span></span
+                  ><span class="fh-card-arrow">${commandIcon("arrow")}</span>
+                </button>
+              </div>
+              <div class="fh-bottom">
+                <div class="fh-continue">
+                  ${
+                    this.savedAt
+                      ? html`<div>
+                            <span class="fh-eyebrow"
+                              >PICK UP WHERE YOU LEFT OFF</span
+                            ><strong>Your saved world</strong
+                            ><small
+                              >Saved
+                              ${new Date(this.savedAt).toLocaleString()}</small
+                            >
+                          </div>
+                          <button @click=${this.resume}>
+                            Continue ${commandIcon("arrow")}
+                          </button>`
+                      : html`<div>
+                          <strong>Every world has a beginning.</strong
+                          ><small
+                            >Start a game. Your progress saves here
+                            automatically.</small
+                          >
+                        </div>`
+                  }
+                </div>
+                <div class="fh-settings">
+                  <label for="fh-difficulty">Solo difficulty</label
+                  ><select
+                    id="fh-difficulty"
+                    .value=${this.selected}
+                    @change=${(event: Event) => this.choose((event.target as HTMLSelectElement).value as Difficulty)}
+                  >
+                    ${soloPresets.map((preset) => html`<option value=${preset.difficulty}>${preset.name}</option>`)}</select
+                  ><small
+                    >${soloPresets.find((preset) => preset.difficulty === this.selected)?.description}</small
+                  >
+                </div>
+              </div>
+              ${this.saveError ? html`<p class="fh-storage-error" role="status">Saving is unavailable. Allow site storage to keep your progress.</p>` : html``}
+            `
+      }
+      <footer class="fh-footer">
+        <span>© OpenFront and Contributors</span
+        ><a href="https://github.com/AGames21/openfront-friends"
+          >Source & credits ${commandIcon("arrow")}</a
         >
-      </div>
+      </footer>
     </section>`;
   }
 }

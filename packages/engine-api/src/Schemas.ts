@@ -1,6 +1,7 @@
 import { zb } from "@openfront/zbin";
 import quickChatData from "resources/QuickChat.json";
 import { z } from "zod";
+import { FRIENDS_MISSIONS } from "./game/FriendsContent";
 import {
   AllPlayers,
   Difficulty,
@@ -342,6 +343,8 @@ export const GameConfigSchema = z.object({
   // Stripped from gameStartInfo and from the advertised lobby config: sibling
   // ids are private lobby ids, which are join secrets.
   pool: PoolConfigSchema.optional(),
+  friendsMode: z.enum(FRIENDS_MISSIONS).optional(),
+  friendsAircraft: z.boolean().optional(),
 });
 
 // What a host sends in update_game_config. maxPlayers is the private-lobby

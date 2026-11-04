@@ -102,6 +102,8 @@ export interface UnitParamsMap {
   };
 
   [UnitType.Factory]: Record<string, never>;
+  [UnitType.Airfield]: Record<string, never>;
+  [UnitType.Aircraft]: Record<string, never>;
 
   [UnitType.MissileSilo]: Record<string, never>;
 
@@ -534,7 +536,7 @@ export interface Game extends GameLike {
   playerByClientID(id: ClientID): Player | null;
   playerBySmallID(id: number): Player | TerraNullius;
   hasPlayer(id: PlayerID): boolean;
-  addPlayer(playerInfo: PlayerInfo): Player;
+  addPlayer(playerInfo: PlayerInfo, team?: Team | null): Player;
   terraNullius(): TerraNullius;
   owner(ref: TileRef): Player | TerraNullius;
 

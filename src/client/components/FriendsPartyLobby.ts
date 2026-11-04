@@ -36,6 +36,7 @@ import "./friends-party.css";
 export class FriendsPartyLobby extends LitElement {
   @property() uid = "";
   @property() displayName = "";
+  @property() activity: "standard" | "survival" | "capture" = "standard";
   @state() private code = "";
   @state() private count = 4;
   @state() private members: PartyMember[] = [];
@@ -106,8 +107,9 @@ export class FriendsPartyLobby extends LitElement {
             createdAt: now,
             version: PARTY_VERSION,
             named: true,
-            name: `${me.name}'s ${this.count === 4 ? "2v2" : "1v1"} room`,
+            name: `${me.name}'s ${this.activity === "survival" ? "co-op" : this.count === 4 ? "2v2" : "1v1"} room`,
             partyCount: this.count,
+            partyActivity: this.activity,
             roomIDs: ids,
           },
         ]),
@@ -195,7 +197,14 @@ export class FriendsPartyLobby extends LitElement {
         onChildAdded(
           this.path(
             `inputs/${member.uid}`,
-            memberRoom({ roomIDs: this.roomIDs, members: this.members }, index),
+            memberRoom(
+              {
+                roomIDs: this.roomIDs,
+                members: this.members,
+                version: PARTY_VERSION,
+              },
+              index,
+            ),
           ),
           (snapshot) => {
             try {
@@ -272,6 +281,7 @@ export class FriendsPartyLobby extends LitElement {
         this.roomIDs = meta.roomIDs;
         this.hostUID = meta.host.uid;
         this.count = meta.partyCount;
+        this.activity = meta.partyActivity ?? "standard";
         this.started = false;
         this.off.push(
           onChildAdded(this.path(`inputs/${this.hostUID}`), (snapshot) => {
@@ -348,13 +358,18 @@ export class FriendsPartyLobby extends LitElement {
         this.code,
         this.members,
         choosePartyMap(this.votes, this.members),
+        this.activity,
       );
       const paths = Object.fromEntries(
         this.roomIDs.map((room) => [
           `rooms/${room}/start`,
           JSON.stringify({
             ...start,
-            friendsParty: { roomIDs: this.roomIDs, members: this.members },
+            friendsParty: {
+              roomIDs: this.roomIDs,
+              members: this.members,
+              version: PARTY_VERSION,
+            },
           }),
         ]),
       );
@@ -371,7 +386,11 @@ export class FriendsPartyLobby extends LitElement {
   private launch(start: WireGameStartInfo, me: PartyMember) {
     if (this.started) return;
     this.started = true;
-    const party: PartyInfo = { roomIDs: this.roomIDs, members: this.members };
+    const party: PartyInfo = {
+      roomIDs: this.roomIDs,
+      members: this.members,
+      version: PARTY_VERSION,
+    };
     const session: FriendsSession = {
       roomID: this.myRoom,
       uid: this.uid,
@@ -463,7 +482,7 @@ export class FriendsPartyLobby extends LitElement {
                 </button>
               </div>
               <ul>
-                ${this.members.filter(Boolean).map((member, index) => html`<li>${member.name} ${member.uid === this.hostUID ? "· Host" : ""} ${this.count === 4 ? `· Team ${index < 2 ? 1 : 2}` : ""}</li>`)}
+                ${this.members.filter(Boolean).map((member, index) => html`<li>${member.name} ${member.uid === this.hostUID ? "· Host" : ""} ${this.activity === "survival" ? "· Allies" : this.count === 4 ? `· Team ${index < 2 ? 1 : 2}` : ""}</li>`)}
               </ul>
               <p>
                 ${this.members.filter(Boolean).length} / ${this.count} players
@@ -489,12 +508,26 @@ export class FriendsPartyLobby extends LitElement {
               </button>`
           : html`<div class="party-create">
                 <label
+                  >Game mode<select
+                    .value=${this.activity}
+                    @change=${(event: Event) => (this.activity = (event.target as HTMLSelectElement).value as typeof this.activity)}
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="survival">Co-op survival</option>
+                    <option value="capture">Capture points</option>
+                  </select></label
+                >
+                <label
                   >Match type<select
                     .value=${String(this.count)}
                     @change=${(event: Event) => (this.count = Number((event.target as HTMLSelectElement).value))}
                   >
-                    <option value="4">2v2 · four players</option>
-                    <option value="2">1v1 · two players</option>
+                    <option value="4">
+                      ${this.activity === "survival" ? "4 allies" : "2v2 · four players"}
+                    </option>
+                    <option value="2">
+                      ${this.activity === "survival" ? "2 allies" : "1v1 · two players"}
+                    </option>
                   </select></label
                 ><button ?disabled=${disabled} @click=${this.create}>
                   Create room

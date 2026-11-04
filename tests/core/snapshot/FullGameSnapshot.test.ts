@@ -1,8 +1,16 @@
-import { GameMode } from "@openfront/engine-api/game/GameTypes";
+import {
+  PlayerInfo,
+  PlayerType,
+  UnitType,
+  GameMode,
+} from "@openfront/engine-api/game/GameTypes";
 import { GameConfig, GameStartInfo } from "@openfront/engine-api/Schemas";
+import { AirfieldExecution } from "@openfront/engine/execution/AirfieldExecution";
+import { FriendsMissionExecution } from "@openfront/engine/execution/FriendsMissionExecution";
 import { Game } from "@openfront/engine/game/Game";
 import { GameRunner } from "@openfront/engine/GameRunner";
 import { EXECUTION_SNAPSHOT_TYPES } from "@openfront/engine/snapshot/ExecutionRegistry";
+import { snapshotGame } from "@openfront/engine/snapshot/GameSnapshot";
 import { decodeSnapshotValue } from "@openfront/engine/snapshot/SnapshotCodec";
 import {
   createScriptedRunner,
@@ -10,7 +18,8 @@ import {
   scriptedGameStart,
   stepScripted,
 } from "../../util/ScriptedGame";
-import { diffSnapshots } from "../../util/Snapshot";
+import { setup } from "../../util/Setup";
+import { expectSnapshotRoundTrip, diffSnapshots } from "../../util/Snapshot";
 
 /**
  * The oracle from the design doc: a game played straight through and the
@@ -191,14 +200,40 @@ describe.each(VARIANTS)("full game snapshots: %s", (_, overrides) => {
   );
 
   test(
-    "the game exercised every execution type",
-    () => {
+    "standard and mission games exercise every execution type",
+    async () => {
       if (Object.keys(overrides).length > 0) return; // checked once, on FFA
       // Runs during the spawn phase and finishes inside init, so it is never
       // alive at a tick boundary. BasicExecutions.test.ts covers it directly.
       const neverStored = new Set(["Pause"]);
+      const exercised = new Set(reference.execTypes);
+      // Optional content is deliberately absent from legacy games. Exercise its
+      // registered executions in a mission, including an exact save/restore.
+      const mission = await setup(
+        "plains",
+        {
+          friendsAircraft: true,
+          friendsMode: "capture",
+          infiniteGold: true,
+          instantBuild: true,
+        },
+        [new PlayerInfo("Pilot", PlayerType.Human, "pilot001", "pilot")],
+      );
+      const pilot = mission.player("pilot");
+      for (let x = 0; x < 20; x++)
+        for (let y = 0; y < 20; y++) pilot.conquer(mission.ref(x, y));
+      pilot.setSpawnTile(mission.ref(5, 5));
+      const field = pilot.buildUnit(UnitType.Airfield, mission.ref(10, 10), {});
+      mission.addExecution(
+        new FriendsMissionExecution("capture"),
+        new AirfieldExecution(field),
+      );
+      mission.executeNextTick();
+      mission.executeNextTick();
+      execTypesIn(snapshotGame(mission), exercised);
+      await expectSnapshotRoundTrip(mission, "plains", 10);
       const missing = EXECUTION_SNAPSHOT_TYPES.map((t) => t.name).filter(
-        (name) => !reference.execTypes.has(name) && !neverStored.has(name),
+        (name) => !exercised.has(name) && !neverStored.has(name),
       );
       expect(missing).toEqual([]);
     },

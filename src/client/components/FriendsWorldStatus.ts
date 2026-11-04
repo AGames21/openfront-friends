@@ -32,7 +32,11 @@ export class FriendsWorldStatus extends LitElement {
   }
   private refresh() {
     const game = document.querySelector<ControlPanel>("control-panel")?.game;
-    if (!document.querySelector(".in-game") || !game) {
+    if (
+      !document.querySelector(".in-game") ||
+      !game ||
+      game.config().gameConfig().friendsMode
+    ) {
       if (this.data) this.data = null;
       return;
     }

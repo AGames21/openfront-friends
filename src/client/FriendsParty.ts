@@ -1,5 +1,6 @@
 import {
   Difficulty,
+  HumansVsNations,
   GameMapSize,
   GameMapType,
   GameMode,
@@ -8,7 +9,7 @@ import {
 import type { WireGameStartInfo } from "@openfront/shared/WireSchemas";
 import type { FriendsSession } from "./FriendsRelay";
 
-export const PARTY_VERSION = "friends-party-v1";
+export const PARTY_VERSION = "friends-party-v2-content";
 export const PARTY_MAPS = [
   GameMapType.World,
   GameMapType.Europe,
@@ -22,6 +23,7 @@ export interface PartyMember {
 export interface PartyInfo {
   roomIDs: string[];
   members: PartyMember[];
+  version?: string;
 }
 export interface PartyResume {
   session: FriendsSession;
@@ -48,6 +50,7 @@ export function partyStart(
   gameID: string,
   members: PartyMember[],
   map: GameMapType,
+  activity: "standard" | "survival" | "capture" = "standard",
 ): WireGameStartInfo {
   const teams = members.length === 4;
   return {
@@ -60,17 +63,29 @@ export function partyStart(
       ...(teams ? { teamIndex: index < 2 ? 0 : 1 } : {}),
     })),
     config: {
+      friendsAircraft: true,
+      ...(activity !== "standard"
+        ? {
+            friendsMode: activity,
+            spawnImmunityDuration: 0,
+            startingGold: 500000,
+          }
+        : {}),
       gameMap: map,
       gameMapSize: GameMapSize.Compact,
       gameType: GameType.Private,
-      gameMode: teams ? GameMode.Team : GameMode.FFA,
-      ...(teams ? { playerTeams: 2 } : {}),
+      gameMode: activity === "survival" || teams ? GameMode.Team : GameMode.FFA,
+      ...(activity === "survival"
+        ? { playerTeams: HumansVsNations }
+        : teams
+          ? { playerTeams: 2 }
+          : {}),
       difficulty: Difficulty.Medium,
-      donateGold: teams,
-      donateTroops: teams,
-      bots: 100,
+      donateGold: teams || activity === "survival",
+      donateTroops: teams || activity === "survival",
+      bots: activity === "standard" ? 100 : 25,
       nations: "default",
-      spawnImmunityDuration: 3000,
+      spawnImmunityDuration: activity === "standard" ? 3000 : 0,
       infiniteGold: false,
       infiniteTroops: false,
       instantBuild: false,
@@ -96,7 +111,7 @@ export function readPartyResume(uid: string): PartyResume | null {
       localStorage.getItem(`friends-party-resume:${uid}`) ?? "null",
     ) as PartyResume;
     return value?.session?.uid === uid &&
-      value.session.party &&
+      value.session.party?.version === PARTY_VERSION &&
       Date.now() - value.savedAt < 7_000_000
       ? value
       : null;

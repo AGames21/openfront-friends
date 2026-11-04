@@ -1,4 +1,8 @@
-import { GameMode, GameMapType } from "@openfront/engine-api/game/GameTypes";
+import {
+  GameMode,
+  GameMapType,
+  HumansVsNations,
+} from "@openfront/engine-api/game/GameTypes";
 import { WireGameStartInfoSchema } from "@openfront/shared/WireSchemas";
 import { describe, expect, it } from "vitest";
 import {
@@ -13,6 +17,38 @@ const members = Array.from({ length: 4 }, (_, i) => ({
   name: `Player ${i}`,
 }));
 describe("party rules", () => {
+  it.each([2, 4])(
+    "puts all %i survival commanders together against AI",
+    (count) => {
+      const start = partyStart(
+        "survival",
+        members.slice(0, count),
+        GameMapType.Europe,
+        "survival",
+      );
+      expect(() => WireGameStartInfoSchema.parse(start)).not.toThrow();
+      expect(start.config).toMatchObject({
+        friendsMode: "survival",
+        friendsAircraft: true,
+        gameMode: GameMode.Team,
+        playerTeams: HumansVsNations,
+        donateGold: true,
+        donateTroops: true,
+      });
+    },
+  );
+  it("keeps capture-point rooms competitive with shared team scoring in 2v2", () => {
+    const start = partyStart("capture0", members, GameMapType.World, "capture");
+    expect(() => WireGameStartInfoSchema.parse(start)).not.toThrow();
+    expect(start.config).toMatchObject({
+      friendsMode: "capture",
+      gameMode: GameMode.Team,
+      playerTeams: 2,
+    });
+    expect(start.players.map((player) => player.teamIndex)).toEqual([
+      0, 0, 1, 1,
+    ]);
+  });
   it("creates a valid two-team game with exactly two human players per team", () => {
     const start = partyStart("party000", members, GameMapType.Europe);
     expect(() => WireGameStartInfoSchema.parse(start)).not.toThrow();
