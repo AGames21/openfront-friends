@@ -31,3 +31,12 @@
 /* Hovered nation/unit cards sit below the fixed world-control HUD. */
 .in-game player-info-overlay { margin-top: 100px; }
 @media (max-width:1023px) { .in-game player-info-overlay > div { top: 110px !important; } }
+
+/* Keep alliance cards and event messages inside the viewport, above the dock. */
+.in-game #friends-bottom-hud > div:last-child:not(#friends-hud-stack){position:fixed;left:max(12px,env(safe-area-inset-left));right:auto;bottom:clamp(160px,25dvh,240px);width:min(384px,calc(100vw - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)));max-width:calc(100vw - 24px);max-height:calc(100dvh - clamp(160px,25dvh,240px) - 110px);display:flex;align-items:stretch;overflow-y:auto;overflow-x:hidden;box-sizing:border-box;overscroll-behavior:contain}
+.in-game #friends-bottom-hud events-display,.in-game #friends-bottom-hud actionable-events{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.in-game #friends-bottom-hud events-display>div,.in-game #friends-bottom-hud actionable-events>div{width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+.in-game #friends-bottom-hud actionable-events>div>div{min-width:0;box-sizing:border-box;overflow-wrap:anywhere}
+.in-game #friends-bottom-hud actionable-events button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.in-game #friends-bottom-hud events-display td{overflow-wrap:anywhere}
+@media(max-height:500px){.in-game #friends-bottom-hud > div:last-child:not(#friends-hud-stack){bottom:100px;max-height:calc(100dvh - 180px)}}
