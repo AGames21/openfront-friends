@@ -243,6 +243,14 @@ export class EventsDisplay extends LitElement implements Controller {
   }
 
   private addEvent(event: GameEvent) {
+    const text = document.createElement("div");
+    // Existing event descriptions contain trusted formatting; chat renders text only.
+    text.innerHTML = event.description;
+    document.dispatchEvent(
+      new CustomEvent("friends-game-notice", {
+        detail: text.textContent ?? "",
+      }),
+    );
     this.events = [...this.events, event];
     this.requestUpdate();
   }
