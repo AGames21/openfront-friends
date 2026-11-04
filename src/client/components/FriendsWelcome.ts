@@ -158,14 +158,12 @@ export class FriendsWelcome extends LitElement {
           ${commandIcon("sound")} ${this.muted ? "SOUND OFF" : "SOUND ON"}
         </button>
       </div>
-      <friends-online inline></friends-online>
       <div class="command-hero">
         <div class="command-copy">
           <span class="command-kicker">FRIENDS EDITION</span>
           <h1>OpenFront<span>Build your nation.</span></h1>
           <p>Choose a solo game or find a server.</p>
           <div class="command-actions">
-            ${this.savedAt ? html`<button class="command-secondary" @click=${this.resume}>Continue saved world</button>` : html``}
             <button
               class="command-deploy"
               @pointerenter=${this.hover}
@@ -174,9 +172,11 @@ export class FriendsWelcome extends LitElement {
               ${commandIcon("play")} PLAY SOLO ${commandIcon("arrow")}
             </button>
             ${hosted ? html`<button class="command-secondary" @click=${this.online}>Multiplayer ${commandIcon("arrow")}</button>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
+            ${this.savedAt ? html`<button class="command-secondary" @click=${this.resume}>Continue saved world</button>` : html``}
           </div>
         </div>
       </div>
+      <friends-online inline></friends-online>
       <div class="command-sectionhead">
         <div>
           <span class="command-kicker">SOLO</span>

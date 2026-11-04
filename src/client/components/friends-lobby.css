@@ -1,5 +1,640 @@
 /* Menu and server browser only; in-game HUD stays independent. */
-friends-welcome .command-center{background:#111114eb;border:1px solid #ffffff26;border-radius:14px;padding-top:0;box-shadow:0 24px 70px #0005}friends-welcome .command-topline{background:transparent;padding:18px 28px}friends-welcome .command-status{color:#d4d4db;letter-spacing:.1em}friends-welcome .command-status i{background:#f3d894;box-shadow:none}friends-welcome .command-hero{position:relative;display:block;padding:46px 32px 38px;overflow:hidden;isolation:isolate}friends-welcome .command-hero:after{content:"";position:absolute;inset:0 0 0 35%;z-index:-1;background:linear-gradient(90deg,#111114,transparent),var(--friends-menu-map) center/cover;opacity:.24;mask-image:linear-gradient(90deg,transparent,#000)}friends-welcome .command-copy{max-width:650px}friends-welcome .command-copy h1{font-family:inherit;font-size:clamp(42px,6vw,70px);line-height:1.02;letter-spacing:-3px;font-weight:850;color:#fff;text-shadow:none;background:none;-webkit-text-fill-color:#fff}friends-welcome .command-copy h1 span{display:block;font-size:clamp(18px,2.3vw,24px);font-weight:450;letter-spacing:-.4px;color:#d7d7dd;-webkit-text-fill-color:#d7d7dd;margin-top:14px}friends-welcome .command-copy p{color:#ceced6;font-size:14px}friends-welcome .command-kicker{color:#c6c6d0;font-size:10px;letter-spacing:.13em}friends-welcome .command-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}friends-welcome .command-deploy,.friends-online-panel .command-deploy{background:#f2d89a;color:#171719;box-shadow:none;border:1px solid #f2d89a;border-radius:8px;font-size:14px;letter-spacing:0}friends-welcome .command-secondary{background:#202024;color:#fff;border:1px solid #4c4c56;border-radius:8px;box-shadow:none}friends-welcome .command-sectionhead{padding:20px 28px 10px}friends-welcome .command-sectionhead h2{font-size:20px;letter-spacing:-.5px;color:#fff}friends-welcome .command-difficulty-note{color:#c2c2cc;font-size:12px}friends-welcome .command-difficulties{padding:0 28px 20px;gap:10px}friends-welcome .command-difficulty{background:#1b1b20;border:1px solid #3e3e47;border-radius:9px;box-shadow:none;padding:17px;text-align:left;min-height:155px}friends-welcome .command-difficulty.selected{background:#292720;border-color:#e1ca94;box-shadow:inset 0 0 0 1px #e1ca9440}friends-welcome .command-difficulty strong{color:#fff;font-size:19px}friends-welcome .command-difficulty p{color:#ceced6;font-size:12px}friends-welcome .command-rankicon{display:none}friends-welcome .command-rank{color:#bfbfc9;font-size:9px;letter-spacing:.08em}friends-welcome .command-bars{display:none}friends-welcome .command-save-note{margin:0;padding:0 28px 15px;color:#bfbfc9;font-size:11px}friends-welcome .command-credits{padding:15px 28px;border-top:1px solid #ffffff15;color:#aaaab5;font-size:10px}.friends-online-panel{width:min(820px,calc(100vw - 28px));max-height:90vh;overflow:auto;background:#141418;color:#fff;border:1px solid #454550;border-radius:14px}.friends-online-panel h2{color:#fff;letter-spacing:-.5px}.friends-online-panel .command-kicker{color:#bbbcc8}.friends-online-panel button{border-radius:7px;cursor:pointer}.friends-online-panel button:disabled{opacity:.4;cursor:default}.friends-online-panel input,.friends-online-panel select{background:#202026;color:#fff;border:1px solid #535360;border-radius:7px;padding:10px;font:inherit;width:100%;box-sizing:border-box}.friends-online-panel label{color:#dedee6;font-size:12px}.friends-online-panel .online-help{color:#bfc0cd;font-size:12px}.server-browser{margin:22px 0;border-block:1px solid #ffffff21;padding:18px 0}.server-heading{display:flex;align-items:center;justify-content:space-between}.server-browser h3{font-size:16px;letter-spacing:-.2px;margin:0 0 10px}.server-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #41414b;border-radius:9px;padding:14px;margin-top:8px;background:#202025}.server-row strong{font-size:14px}.server-row small{display:block;color:#c2c3cf;margin-top:5px;font-size:11px}.server-empty{padding:24px 16px;border:1px dashed #4c4c58;border-radius:9px;color:#bdbecb;font-size:13px}.server-create{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.server-create h3,.server-create>button,.server-create .room-code,.server-create>small{grid-column:1/-1}.server-code-form{display:flex;gap:12px;align-items:flex-end;margin-top:20px}.server-code-form label{flex:1}.room-code{padding:12px;border:1px solid #645c42;border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.room-code strong{font-family:monospace;font-size:19px;user-select:all;color:#ffe4a3}.friends-online-panel>small{color:#babac6}.friends-online-panel form:not(.server-code-form){margin-top:12px}.friends-online-panel .server-create>small{font-size:11px;color:#c8c8d4}
-@media(max-width:650px){friends-welcome .command-hero{padding:30px 22px}friends-welcome .command-difficulties{padding-inline:18px;grid-template-columns:1fr 1fr}friends-welcome .command-difficulty{min-height:130px;padding:13px}friends-welcome .command-sectionhead{padding-inline:20px;flex-wrap:wrap;gap:8px}.server-create{grid-template-columns:1fr}.server-code-form{align-items:stretch;flex-direction:column}}
+friends-welcome .command-center {
+  background: #111114eb;
+  border: 1px solid #ffffff26;
+  border-radius: 14px;
+  padding-top: 0;
+  box-shadow: 0 24px 70px #0005;
+}
+friends-welcome .command-topline {
+  background: transparent;
+  padding: 18px 28px;
+}
+friends-welcome .command-status {
+  color: #d4d4db;
+  letter-spacing: 0.1em;
+}
+friends-welcome .command-status i {
+  background: #f3d894;
+  box-shadow: none;
+}
+friends-welcome .command-hero {
+  position: relative;
+  display: block;
+  padding: 46px 32px 38px;
+  overflow: hidden;
+  isolation: isolate;
+}
+friends-welcome .command-hero:after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 35%;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, #111114, transparent),
+    var(--friends-menu-map) center/cover;
+  opacity: 0.24;
+  mask-image: linear-gradient(90deg, transparent, #000);
+}
+friends-welcome .command-copy {
+  max-width: 650px;
+}
+friends-welcome .command-copy h1 {
+  font-family: inherit;
+  font-size: clamp(42px, 6vw, 70px);
+  line-height: 1.02;
+  letter-spacing: -3px;
+  font-weight: 850;
+  color: #fff;
+  text-shadow: none;
+  background: none;
+  -webkit-text-fill-color: #fff;
+}
+friends-welcome .command-copy h1 span {
+  display: block;
+  font-size: clamp(18px, 2.3vw, 24px);
+  font-weight: 450;
+  letter-spacing: -0.4px;
+  color: #d7d7dd;
+  -webkit-text-fill-color: #d7d7dd;
+  margin-top: 14px;
+}
+friends-welcome .command-copy p {
+  color: #ceced6;
+  font-size: 14px;
+}
+friends-welcome .command-kicker {
+  color: #c6c6d0;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+friends-welcome .command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+friends-welcome .command-deploy,
+.friends-online-panel .command-deploy {
+  background: #f2d89a;
+  color: #171719;
+  box-shadow: none;
+  border: 1px solid #f2d89a;
+  border-radius: 8px;
+  font-size: 14px;
+  letter-spacing: 0;
+}
+friends-welcome .command-secondary {
+  background: #202024;
+  color: #fff;
+  border: 1px solid #4c4c56;
+  border-radius: 8px;
+  box-shadow: none;
+}
+friends-welcome .command-sectionhead {
+  padding: 20px 28px 10px;
+}
+friends-welcome .command-sectionhead h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+friends-welcome .command-difficulty-note {
+  color: #c2c2cc;
+  font-size: 12px;
+}
+friends-welcome .command-difficulties {
+  padding: 0 28px 20px;
+  gap: 10px;
+}
+friends-welcome .command-difficulty {
+  background: #1b1b20;
+  border: 1px solid #3e3e47;
+  border-radius: 9px;
+  box-shadow: none;
+  padding: 17px;
+  text-align: left;
+  min-height: 155px;
+}
+friends-welcome .command-difficulty.selected {
+  background: #292720;
+  border-color: #e1ca94;
+  box-shadow: inset 0 0 0 1px #e1ca9440;
+}
+friends-welcome .command-difficulty strong {
+  color: #fff;
+  font-size: 19px;
+}
+friends-welcome .command-difficulty p {
+  color: #ceced6;
+  font-size: 12px;
+}
+friends-welcome .command-rankicon {
+  display: none;
+}
+friends-welcome .command-rank {
+  color: #bfbfc9;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+friends-welcome .command-bars {
+  display: none;
+}
+friends-welcome .command-save-note {
+  margin: 0;
+  padding: 0 28px 15px;
+  color: #bfbfc9;
+  font-size: 11px;
+}
+friends-welcome .command-credits {
+  padding: 15px 28px;
+  border-top: 1px solid #ffffff15;
+  color: #aaaab5;
+  font-size: 10px;
+}
+.friends-online-panel {
+  width: min(820px, calc(100vw - 28px));
+  max-height: 90vh;
+  overflow: auto;
+  background: #141418;
+  color: #fff;
+  border: 1px solid #454550;
+  border-radius: 14px;
+}
+.friends-online-panel h2 {
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.friends-online-panel .command-kicker {
+  color: #bbbcc8;
+}
+.friends-online-panel button {
+  border-radius: 7px;
+  cursor: pointer;
+}
+.friends-online-panel button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.friends-online-panel input,
+.friends-online-panel select {
+  background: #202026;
+  color: #fff;
+  border: 1px solid #535360;
+  border-radius: 7px;
+  padding: 10px;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.friends-online-panel label {
+  color: #dedee6;
+  font-size: 12px;
+}
+.friends-online-panel .online-help {
+  color: #bfc0cd;
+  font-size: 12px;
+}
+.server-browser {
+  margin: 22px 0;
+  border-block: 1px solid #ffffff21;
+  padding: 18px 0;
+}
+.server-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.server-browser h3 {
+  font-size: 16px;
+  letter-spacing: -0.2px;
+  margin: 0 0 10px;
+}
+.server-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #41414b;
+  border-radius: 9px;
+  padding: 14px;
+  margin-top: 8px;
+  background: #202025;
+}
+.server-row strong {
+  font-size: 14px;
+}
+.server-row small {
+  display: block;
+  color: #c2c3cf;
+  margin-top: 5px;
+  font-size: 11px;
+}
+.server-empty {
+  padding: 24px 16px;
+  border: 1px dashed #4c4c58;
+  border-radius: 9px;
+  color: #bdbecb;
+  font-size: 13px;
+}
+.server-create {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+.server-create h3,
+.server-create > button,
+.server-create .room-code,
+.server-create > small {
+  grid-column: 1/-1;
+}
+.server-code-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 20px;
+}
+.server-code-form label {
+  flex: 1;
+}
+.room-code {
+  padding: 12px;
+  border: 1px solid #645c42;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.room-code strong {
+  font-family: monospace;
+  font-size: 19px;
+  user-select: all;
+  color: #ffe4a3;
+}
+.friends-online-panel > small {
+  color: #babac6;
+}
+.friends-online-panel form:not(.server-code-form) {
+  margin-top: 12px;
+}
+.friends-online-panel .server-create > small {
+  font-size: 11px;
+  color: #c8c8d4;
+}
+@media (max-width: 650px) {
+  friends-welcome .command-hero {
+    padding: 30px 22px;
+  }
+  friends-welcome .command-difficulties {
+    padding-inline: 18px;
+    grid-template-columns: 1fr 1fr;
+  }
+  friends-welcome .command-difficulty {
+    min-height: 130px;
+    padding: 13px;
+  }
+  friends-welcome .command-sectionhead {
+    padding-inline: 20px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .server-create {
+    grid-template-columns: 1fr;
+  }
+  .server-code-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
 
-friends-welcome .command-actions .command-secondary{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-height:56px;min-width:190px;padding:15px 24px;font:700 14px system-ui;border:1px solid #656570;border-radius:8px}friends-welcome .command-actions .command-secondary svg{width:18px;height:18px}
+friends-welcome .command-actions .command-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 56px;
+  min-width: 190px;
+  padding: 15px 24px;
+  font: 700 14px system-ui;
+  border: 1px solid #656570;
+  border-radius: 8px;
+}
+friends-welcome .command-actions .command-secondary svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* A focused landing page: play first, browse second. */
+friends-welcome .command-center {
+  max-width: 960px;
+  margin: 24px auto 36px;
+  background: #141719f5;
+  border-color: #ffffff1c;
+  box-shadow: 0 24px 100px #0007;
+}
+friends-welcome .command-hero {
+  padding: 40px 36px 32px;
+  text-align: left;
+  background: none;
+}
+friends-welcome .command-copy {
+  max-width: none;
+  text-align: left;
+}
+friends-welcome .command-copy h1 {
+  font-size: clamp(40px, 5vw, 60px);
+  letter-spacing: -2.5px;
+  margin: 12px 0 0;
+}
+friends-welcome .command-copy h1 span {
+  font-size: 20px;
+  margin-top: 10px;
+}
+friends-welcome .command-copy p {
+  margin: 14px 0;
+  color: #aeb7bc;
+}
+friends-welcome .command-actions {
+  justify-content: flex-start;
+  align-items: stretch;
+  margin-top: 24px;
+}
+friends-welcome .command-actions .command-deploy {
+  flex: 0 1 235px;
+  min-width: 180px;
+  padding: 15px 22px;
+  min-height: 52px;
+  font-size: 13px;
+}
+friends-welcome .command-actions .command-secondary {
+  min-width: 0;
+  min-height: 52px;
+  padding: 14px 20px;
+  font-size: 13px;
+  background: #ffffff07;
+  border-color: #ffffff26;
+}
+friends-welcome .command-actions button:hover {
+  filter: brightness(1.12);
+  border-color: #e7d09b;
+}
+friends-welcome .command-actions button:focus-visible {
+  outline: 2px solid #f2d89a;
+  outline-offset: 4px;
+}
+friends-online[inline] {
+  display: block;
+  margin: 0 28px 12px;
+}
+friends-online[inline] > section {
+  display: block;
+}
+friends-online[inline] .server-browser {
+  margin: 0;
+  padding: 20px;
+  background: #1b1f22;
+  border: 1px solid #ffffff16;
+  border-radius: 12px;
+  text-align: left;
+}
+.server-eyebrow {
+  display: block;
+  color: #b8ab8c;
+  font: 700 9px/1.4 system-ui;
+  letter-spacing: 0.15em;
+  margin-bottom: 5px;
+}
+friends-online .server-heading h3 {
+  font: 650 19px/1.2 system-ui;
+  margin: 0;
+  color: #f4f4f0;
+}
+friends-online .server-heading {
+  gap: 12px;
+  margin-bottom: 10px;
+}
+friends-online .server-browser .online-help {
+  font: 12px/1.6 system-ui;
+  color: #a5afb5;
+  margin: 0 0 16px;
+}
+friends-online .server-browser button,
+.friends-online-panel button {
+  appearance: none;
+  background: #2a3034;
+  border: 1px solid #ffffff26;
+  color: #f1f2ed;
+  padding: 10px 16px;
+  min-height: 40px;
+  font: 600 12px/1.3 system-ui;
+  border-radius: 7px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+friends-online .server-browser button:hover:enabled,
+.friends-online-panel button:hover:enabled {
+  background: #343c41;
+  border-color: #b3a17a;
+}
+friends-online .server-browser button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+friends-online button:focus-visible,
+.friends-online-panel input:focus-visible,
+.friends-online-panel select:focus-visible {
+  outline: 2px solid #f2d89a;
+  outline-offset: 3px;
+}
+friends-online .server-heading > button {
+  background: transparent;
+  color: #b8c2c7;
+  min-height: 34px;
+  padding: 7px 12px;
+}
+friends-online .server-list {
+  max-height: 230px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+friends-online .server-row {
+  padding: 14px 16px;
+  margin: 0 0 8px;
+  background: #23292d;
+  border: 1px solid #ffffff13;
+  border-radius: 8px;
+  gap: 16px;
+}
+friends-online .server-row > div {
+  min-width: 0;
+}
+friends-online .server-row strong {
+  display: block;
+  overflow-wrap: anywhere;
+  color: #f1f2ee;
+  font: 600 14px/1.4 system-ui;
+}
+friends-online .server-row small {
+  font: 11px/1.5 system-ui;
+  color: #9eacb3;
+  margin-top: 4px;
+}
+friends-online .server-row button {
+  background: #ebd39d;
+  color: #20221f;
+  border-color: #ebd39d;
+  min-width: 70px;
+  flex-shrink: 0;
+}
+friends-online .server-row button:hover:enabled {
+  background: #ffe8b5;
+  color: #20221f;
+}
+friends-online .server-empty {
+  margin: 0;
+  padding: 22px 16px;
+  border: 1px dashed #ffffff25;
+  background: #ffffff02;
+  color: #acb6bc;
+  text-align: center;
+  font: 12px/1.6 system-ui;
+}
+.server-browser-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+.server-browser-actions > span {
+  font: 11px/1.5 system-ui;
+  color: #97a5ad;
+}
+friends-online .server-browser-actions button {
+  background: transparent;
+  border: 0;
+  padding: 5px 0;
+  min-height: 30px;
+  color: #ead5aa;
+}
+.friends-online-panel {
+  padding: 24px;
+  box-sizing: border-box;
+  box-shadow: 0 24px 100px #0009;
+}
+.friends-online-panel .command-sectionhead {
+  padding: 0 0 20px;
+  align-items: center;
+}
+.friends-online-panel .server-create {
+  background: #1d2226;
+  padding: 18px;
+  border: 1px solid #ffffff13;
+  border-radius: 10px;
+  gap: 16px;
+}
+.friends-online-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  font: 600 12px/1.5 system-ui;
+}
+.friends-online-panel input,
+.friends-online-panel select {
+  background: #12171b;
+  border-color: #ffffff29;
+  min-height: 44px;
+  font-size: 14px;
+  color: #f3f4ef;
+  outline: none;
+}
+.friends-online-panel input::placeholder {
+  color: #82919b;
+}
+.friends-online-panel .server-create > button {
+  justify-self: start;
+  background: #ebd39d;
+  color: #20221f;
+  padding-inline: 24px;
+}
+.friends-online-panel .server-code-form {
+  border-top: 1px solid #ffffff16;
+  padding-top: 20px;
+  align-items: flex-end;
+}
+.friends-online-panel .server-code-form button {
+  min-height: 44px;
+}
+.friends-online-panel .online-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.friends-online-panel > p {
+  font: 13px/1.6 system-ui;
+  color: #bdc8ce;
+}
+.friends-online-panel > small {
+  display: block;
+  margin-top: 18px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+friends-welcome .command-difficulty {
+  min-height: 125px;
+  padding: 15px;
+}
+friends-welcome .command-difficulty p {
+  line-height: 1.6;
+}
+@media (max-width: 650px) {
+  friends-welcome .command-center {
+    margin: 10px 0 80px;
+    border-radius: 12px;
+  }
+  friends-welcome .command-hero {
+    padding: 28px 22px 24px;
+  }
+  friends-welcome .command-copy h1 {
+    letter-spacing: -1.5px;
+  }
+  friends-welcome .command-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  friends-welcome .command-actions .command-deploy {
+    grid-column: 1/-1;
+    width: 100%;
+  }
+  friends-welcome .command-actions .command-secondary {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+  friends-online[inline] {
+    margin: 0 16px 8px;
+  }
+  friends-online[inline] .server-browser {
+    padding: 16px;
+  }
+  .server-browser-actions {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .friends-online-panel {
+    padding: 20px;
+  }
+  .friends-online-panel .server-create {
+    padding: 14px;
+  }
+  .friends-online-panel .server-code-form {
+    align-items: stretch;
+  }
+}

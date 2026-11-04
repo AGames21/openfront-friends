@@ -16,55 +16,105 @@ export class FriendsChat extends LitElement {
   static styles = css`
     :host {
       position: fixed;
-      bottom: 12px;
-      left: 12px;
+      bottom: 16px;
+      left: 16px;
       z-index: 2000;
-      width: min(300px, calc(100vw - 24px));
-      color: white;
-      font: 14px system-ui;
+      width: min(310px, calc(100vw - 32px));
+      color: #f0f2ee;
+      font: 12px/1.5 system-ui;
     }
     section {
-      background: #101820ed;
-      border: 1px solid #687785;
-      border-radius: 8px;
-      padding: 10px;
+      background: #171d21f5;
+      border: 1px solid #ffffff26;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 8px 32px #0005;
+      backdrop-filter: blur(16px);
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    header strong {
+      font-weight: 600;
+      letter-spacing: 0.01em;
     }
     button,
     input {
+      box-sizing: border-box;
       font: inherit;
+      border: 1px solid #ffffff24;
+      border-radius: 6px;
+      color: #e4e9e7;
+      background: #272f34;
+      min-height: 34px;
+      padding: 6px 10px;
     }
     button {
       cursor: pointer;
     }
-    header {
-      display: flex;
-      justify-content: space-between;
+    button:hover:enabled {
+      border-color: #e5c98c;
+      background: #343e43;
+    }
+    button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    header button {
+      min-height: 28px;
+      background: transparent;
+      color: #cab78e;
+      font-size: 11px;
+      padding: 3px 9px;
+    }
+    input {
+      min-width: 0;
+      flex: 1;
+      background: #10171b;
+      outline: none;
+    }
+    input::placeholder {
+      color: #8a9aa3;
+    }
+    input:focus,
+    button:focus-visible {
+      outline: 2px solid #e5c98c;
+      outline-offset: 2px;
     }
     ol {
-      height: 130px;
+      height: 160px;
+      max-height: 30dvh;
       overflow: auto;
       padding: 0;
+      margin: 12px 0;
       list-style: none;
       overflow-wrap: anywhere;
+      border-block: 1px solid #ffffff10;
     }
     li {
-      margin: 5px 0;
+      margin: 8px 0;
+    }
+    li strong {
+      color: #eddaa9;
+      font-weight: 600;
+    }
+    .system {
+      color: #a7b5bd;
+    }
+    .system strong {
+      color: #a7b5bd;
     }
     form {
       display: flex;
       gap: 6px;
     }
-    input {
-      min-width: 0;
-      flex: 1;
-    }
-    .system {
-      color: #bdcbd6;
-    }
   `;
   @state() private lines: { name: string; text: string; system?: boolean }[] =
     [];
-  @state() private collapsed = false;
+  @state() private collapsed = true;
   @state() private draft = "";
   @state() private sending = false;
   private session?: FriendsSession;
@@ -153,7 +203,7 @@ export class FriendsChat extends LitElement {
           aria-expanded=${!this.collapsed}
           @click=${() => (this.collapsed = !this.collapsed)}
         >
-          ${this.collapsed ? "Show" : "Hide"}
+          ${this.collapsed ? "Open" : "Minimize"}
         </button>
       </header>
       ${

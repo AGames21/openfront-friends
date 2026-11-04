@@ -620,20 +620,20 @@ export class FriendsOnline extends LitElement {
       console.error("Matchmaking failed", e);
     }
   }
-  private renderServers() {
+  private renderServers(compact = false) {
     const disabled =
       this.busy || this.nameLoading || !this.user || !this.savedDisplayName;
     return html`<div class="server-browser">
       <div class="server-heading">
-        <h3>Public servers</h3>
+        <div>
+          <span class="server-eyebrow">PLAY TOGETHER</span>
+          <h3>Open lobbies</h3>
+        </div>
         <button ?disabled=${this.busy} @click=${() => this.watchServers()}>
           Refresh
         </button>
       </div>
-      <p class="online-help">
-        World map · Normal AI · 2 players + AI. The host starts the game with a
-        three-second countdown.
-      </p>
+      <p class="online-help">Find a commander. Build a world together.</p>
       <div class="server-list">
         ${
           this.servers.length
@@ -653,83 +653,94 @@ export class FriendsOnline extends LitElement {
                   </div>`,
               )
             : html`<p class="server-empty">
-                No open servers. Host one below or use Quick play.
+                No lobbies yet. Be the first to host a world.
               </p>`
         }
       </div>
-      <div class="server-create">
-        <h3>Host a server</h3>
-        <label
-          >Server name<input
-            maxlength="40"
-            placeholder="Friday night"
-            ?disabled=${this.busy}
-            .value=${this.roomName}
-            @input=${(e: Event) => (this.roomName = (e.target as HTMLInputElement).value)} /></label
-        ><label
-          >Visibility<select
-            ?disabled=${this.busy}
-            .value=${this.visibility}
-            @change=${(e: Event) => (this.visibility = (e.target as HTMLSelectElement).value)}
-          >
-            <option value="public">Public — listed for everyone</option>
-            <option value="private">Private — room code only</option>
-          </select></label
-        ><button
-          ?disabled=${disabled}
-          @click=${() => this.matchmaking(this.visibility === "private" ? "private" : "public")}
-        >
-          Create server
-        </button>
-        ${
-          this.hostingCode
-            ? html`<p class="room-code">
-                  Room code <strong>${this.hostingCode}</strong
-                  ><button
-                    @click=${() =>
-                      navigator.clipboard
-                        .writeText(this.hostingCode)
-                        .then(() => (this.status = "Code copied."))
-                        .catch(
-                          () =>
-                            (this.status =
-                              "Select and copy the room code above."),
-                        )}
+      ${
+        compact
+          ? html`<div class="server-browser-actions">
+              <span
+                >World map <span aria-hidden="true">·</span> 2 players +
+                AI</span
+              ><button @click=${() => this.open()}>
+                Host or join privately <span aria-hidden="true">↗</span>
+              </button>
+            </div>`
+          : html`<div class="server-create">
+                <h3>Host a server</h3>
+                <label
+                  >Server name<input
+                    maxlength="40"
+                    placeholder="Friday night"
+                    ?disabled=${this.busy}
+                    .value=${this.roomName}
+                    @input=${(e: Event) => (this.roomName = (e.target as HTMLInputElement).value)} /></label
+                ><label
+                  >Visibility<select
+                    ?disabled=${this.busy}
+                    .value=${this.visibility}
+                    @change=${(e: Event) => (this.visibility = (e.target as HTMLSelectElement).value)}
                   >
-                    Copy
-                  </button>
-                </p>
-                <button
-                  ?disabled=${this.starting}
-                  @click=${() => this.startHosted?.()}
+                    <option value="public">Public — listed for everyone</option>
+                    <option value="private">Private — room code only</option>
+                  </select></label
+                ><button
+                  ?disabled=${disabled}
+                  @click=${() => this.matchmaking(this.visibility === "private" ? "private" : "public")}
                 >
-                  ${this.starting ? `Starting in ${this.seconds}…` : "Start game"}</button
-                ><small>Open until you start or leave.</small>`
-            : html``
-        }
-      </div>
-      <form
-        class="server-code-form"
-        @submit=${(e: Event) => {
-          e.preventDefault();
-          void this.matchmaking("join", this.joinCode);
-        }}
-      >
-        <label
-          >Join a private server<input
-            required
-            maxlength="30"
-            placeholder="Room code"
-            ?disabled=${this.busy}
-            @input=${(e: Event) => (this.joinCode = (e.target as HTMLInputElement).value.trim())} /></label
-        ><button ?disabled=${disabled}>Join by code</button>
-      </form>
+                  Create server
+                </button>
+                ${
+                  this.hostingCode
+                    ? html`<p class="room-code">
+                          Room code <strong>${this.hostingCode}</strong
+                          ><button
+                            @click=${() =>
+                              navigator.clipboard
+                                .writeText(this.hostingCode)
+                                .then(() => (this.status = "Code copied."))
+                                .catch(
+                                  () =>
+                                    (this.status =
+                                      "Select and copy the room code above."),
+                                )}
+                          >
+                            Copy
+                          </button>
+                        </p>
+                        <button
+                          ?disabled=${this.starting}
+                          @click=${() => this.startHosted?.()}
+                        >
+                          ${this.starting ? `Starting in ${this.seconds}…` : "Start game"}</button
+                        ><small>Open until you start or leave.</small>`
+                    : html``
+                }
+              </div>
+              <form
+                class="server-code-form"
+                @submit=${(e: Event) => {
+                  e.preventDefault();
+                  void this.matchmaking("join", this.joinCode);
+                }}
+              >
+                <label
+                  >Join a private server<input
+                    required
+                    maxlength="30"
+                    placeholder="Room code"
+                    ?disabled=${this.busy}
+                    @input=${(e: Event) => (this.joinCode = (e.target as HTMLInputElement).value.trim())} /></label
+                ><button ?disabled=${disabled}>Join by code</button>
+              </form>`
+      }
     </div>`;
   }
   render() {
     if (!this.opened && this.hasAttribute("inline"))
       return html`<section aria-label="Available servers">
-        ${this.renderServers()}${!this.user ? html`<p>Sign in through Multiplayer to host or join.</p>` : html``}
+        ${this.renderServers(true)}
       </section>`;
     if (!this.opened)
       return this.notice
@@ -754,7 +765,7 @@ export class FriendsOnline extends LitElement {
             @click=${async () => {
               await this.cancelQueue?.();
               this.opened = false;
-              this.directoryOff?.();
+              this.watchServers();
             }}
           >
             Close

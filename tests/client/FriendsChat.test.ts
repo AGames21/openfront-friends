@@ -17,6 +17,9 @@ describe("Friends chat", () => {
   it("shows notifications as text and keeps chat disabled in solo", async () => {
     const chat = new FriendsChat();
     document.body.append(chat);
+    await chat.updateComplete;
+    chat.shadowRoot!.querySelector("button")!.click();
+    await chat.updateComplete;
     document.dispatchEvent(
       new CustomEvent("friends-game-notice", {
         detail: "<img src=x> attacked",
@@ -30,6 +33,9 @@ describe("Friends chat", () => {
   it("sends room messages and removes multiplayer access for solo", async () => {
     const chat = new FriendsChat();
     document.body.append(chat);
+    await chat.updateComplete;
+    chat.shadowRoot!.querySelector("button")!.click();
+    await chat.updateComplete;
     document.dispatchEvent(
       new CustomEvent("friends-chat-session", {
         detail: { session: { roomID: "room", uid: "user" }, name: "Commander" },
