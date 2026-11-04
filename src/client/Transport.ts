@@ -50,6 +50,7 @@ import { getPlayToken } from "./Auth";
 import { LobbyConfig } from "./ClientGameRunner";
 import { clientDevice, clientPlatform } from "./ClientPlatform";
 import { isDesktopShell } from "./DesktopShell";
+import { FriendsPartyRelay } from "./FriendsPartyRelay";
 import { FriendsRelay } from "./FriendsRelay";
 import { showInGameConfirm } from "./InGameModal";
 import {
@@ -264,7 +265,7 @@ export class Transport {
 
   private socket: WebSocket | null = null;
 
-  private localServer: LocalServer | FriendsRelay;
+  private localServer: LocalServer | FriendsRelay | FriendsPartyRelay;
 
   private buffer: ClientMessage[] = [];
 
@@ -442,13 +443,15 @@ export class Transport {
     onconnect: () => void,
     onmessage: (message: ServerMessage) => void,
   ) {
-    this.localServer = this.lobbyConfig.friendsSession
-      ? new FriendsRelay(this.lobbyConfig)
-      : new LocalServer(
-          this.lobbyConfig,
-          this.lobbyConfig.gameRecord !== undefined,
-          this.eventBus,
-        );
+    this.localServer = this.lobbyConfig.friendsSession?.party
+      ? new FriendsPartyRelay(this.lobbyConfig)
+      : this.lobbyConfig.friendsSession
+        ? new FriendsRelay(this.lobbyConfig)
+        : new LocalServer(
+            this.lobbyConfig,
+            this.lobbyConfig.gameRecord !== undefined,
+            this.eventBus,
+          );
     this.localServer.updateCallback(onconnect, onmessage);
     this.localServer.start();
   }

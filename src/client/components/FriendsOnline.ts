@@ -33,6 +33,7 @@ import { validateDisplayName } from "../FriendsDisplayName";
 import { friendsAuth, friendsDB } from "../FriendsFirebase";
 import type { FriendsSession } from "../FriendsRelay";
 import type { JoinLobbyEvent } from "../Main";
+import "./FriendsPartyLobby";
 
 type ListedRoom = { id: string; name: string; hostName: string; createdAt: number };
 type Member = { uid: string; clientID: string; name: string };
@@ -550,6 +551,11 @@ export class FriendsOnline extends LitElement {
                     Save display name
                   </button>
                 </form>
+                <friends-party-lobby
+                  .uid=${this.user.uid}
+                  .displayName=${this.savedDisplayName}
+                  @party-launch=${() => { this.opened = false; this.directoryOff?.(); }}
+                ></friends-party-lobby>
                 ${this.renderServers()}
                 <button
                   class="command-deploy"

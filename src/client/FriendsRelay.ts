@@ -18,6 +18,7 @@ export interface FriendsSession {
   hostUID: string;
   guestUID: string;
   clientID: string;
+  party?: import("./FriendsParty").PartyInfo;
 }
 /** Casual, peer-hosted lockstep. The host orders intents; both peers run the engine. */
 export class FriendsRelay {

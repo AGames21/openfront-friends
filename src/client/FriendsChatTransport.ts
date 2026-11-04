@@ -32,12 +32,29 @@ export function connectRoomChat(
   const { session, names } = room;
   const path = (uid: string) =>
     ref(friendsDB, `rooms/${session.roomID}/inputs/${uid}`);
-  const off = [session.hostUID, session.guestUID].map((uid) =>
+  const off = (
+    session.party ? [session.hostUID] : [session.hostUID, session.guestUID]
+  ).map((uid) =>
     onChildAdded(
       query(path(uid), limitToLast(100)),
       (snapshot) => {
-        const text = readRoomChat(snapshot.val());
-        if (text !== null) receive(names[uid] ?? "Commander", text);
+        if (session.party) {
+          try {
+            const packet = JSON.parse(snapshot.val());
+            if (
+              packet.channel === "party_chat_delivery" &&
+              typeof packet.text === "string" &&
+              packet.text.length <= 300 &&
+              session.party.members.some((member) => member.uid === packet.uid)
+            )
+              receive(names[packet.uid] ?? "Commander", packet.text);
+          } catch {
+            /* Not chat. */
+          }
+        } else {
+          const text = readRoomChat(snapshot.val());
+          if (text !== null) receive(names[uid] ?? "Commander", text);
+        }
       },
       error,
     ),

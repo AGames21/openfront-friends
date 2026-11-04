@@ -41,3 +41,26 @@ The in-game Exit to menu button and settings exit return to /openfront-friends/,
 ## Your public display name
 
 After signing in with Google or email, choose and save a display name in the Multiplayer panel. It is stored in your own Firebase game profile and used for new matches and AI fallbacks. Names use 2-20 letters, digits, spaces, underscores or hyphens; extra whitespace is normalized. The name can be changed later in the same panel. Your Google account name is not changed or automatically published as the match name. Profile data is private to its owner; the chosen name is shared with players through the match roster.
+
+## Reconnectable 1v1 / 2v2 rooms and map voting
+
+In Multiplayer, sign in, save a display name, then use **Play with friends**.
+Choose 1v1 or 2v2, create a room, and share its code. Each player needs a different
+account. The first two slots are Team 1 and the last two are Team 2 in 2v2.
+Once all players join, everyone has 20 seconds to vote for World, Europe or
+North America. Most votes wins; a tie uses the host's vote if it is tied, then the
+listed map order. The match launches automatically when voting closes.
+
+These new rooms retain the committed turn history. A dropped player pauses the
+shared timeline; an open tab reconnects automatically. After refreshing, use
+**Rejoin last match** in Multiplayer on the same account and browser to replay
+and return to the same nation. Replay time grows with match length. The host
+must return before play can resume; host migration is not included. Rooms have
+an approximately two-hour write/rejoin window under the existing database rules.
+A lobby closes after five minutes without all players, or if someone leaves
+before launch. Create a new code in that case.
+
+Quick play and the original public/private server browser keep their previous
+behavior. Use the new Play with friends room options for reconnect and map voting.
+Chat supports every player in a new room. These rooms reuse existing member-only
+Firebase paths and do not require changing deployed database rules.

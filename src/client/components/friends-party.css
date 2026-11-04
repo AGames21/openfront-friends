@@ -1,0 +1,114 @@
+.friends-party {
+  border: 1px solid #ffffff24;
+  background: #1a1e23;
+  padding: 18px;
+  border-radius: 10px;
+  margin: 20px 0;
+  color: #e9edf0;
+}
+.friends-party h3 {
+  margin: 0;
+  font-size: 18px;
+}
+.friends-party p {
+  font: 13px/1.6 system-ui;
+  color: #b9c5ce;
+}
+.friends-party small {
+  display: block;
+  color: #aab8c3;
+  font: 11px/1.6 system-ui;
+  margin: 8px 0;
+}
+.friends-party button {
+  background: #28313a;
+  border: 1px solid #56616a;
+  border-radius: 7px;
+  padding: 10px 15px;
+  min-height: 40px;
+  color: #f4eedb;
+  font: 600 12px system-ui;
+  cursor: pointer;
+}
+.friends-party button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.friends-party button[aria-pressed="true"] {
+  border-color: #f2d89a;
+  background: #403b2c;
+}
+.friends-party label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.friends-party input,
+.friends-party select {
+  min-height: 42px;
+  width: 100%;
+  background: #10181e;
+  color: #fff;
+  border: 1px solid #53606a;
+  border-radius: 6px;
+  padding: 9px;
+  box-sizing: border-box;
+}
+.party-create,
+.friends-party form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-top: 14px;
+}
+.party-create label,
+.friends-party form label {
+  flex: 1;
+}
+.party-code {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+.party-code strong {
+  font: 700 19px monospace;
+  color: #f2d89a;
+  user-select: all;
+}
+.party-maps {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0;
+  flex-wrap: wrap;
+}
+.party-maps button {
+  flex: 1;
+}
+.party-maps small {
+  margin: 5px 0 0;
+}
+.friends-party ul {
+  padding-left: 20px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.friends-party :focus-visible {
+  outline: 2px solid #f2d89a;
+  outline-offset: 3px;
+}
+@media (max-width: 550px) {
+  .party-create,
+  .friends-party form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .friends-party {
+    padding: 14px;
+  }
+  .party-maps {
+    flex-direction: column;
+  }
+}
