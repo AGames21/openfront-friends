@@ -25,11 +25,11 @@
         },
         "guest": {
           ".read": "auth != null",
-          ".write": "(auth != null && !data.exists() && root.child('rooms').child($room).child('meta/host/uid').exists() && (root.child('rooms').child($room).child('meta/createdAt').val() > now - 30000 || root.child('rooms').child($room).child('meta/named').val() === true) && ((newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('meta/host/uid').val() !== auth.uid) || (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid && newData.child('uid').val() === 'closed')) && !root.child('rooms').child($room).child('startingAt').exists() && !root.child('rooms').child($room).child('start').exists()) || (auth != null && !newData.exists() && data.child('uid').val() === auth.uid && !root.child('rooms').child($room).child('startingAt').exists())",
+          ".write": "auth != null && !data.exists() && root.child('rooms').child($room).child('meta/host/uid').exists() && (root.child('rooms').child($room).child('meta/createdAt').val() > now - 30000 || (root.child('rooms').child($room).child('meta/named').val() === true && root.child('rooms').child($room).child('meta/createdAt').val() > now - 310000)) && ((newData.child('uid').val() === auth.uid && root.child('rooms').child($room).child('meta/host/uid').val() !== auth.uid) || (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid && newData.child('uid').val() === 'closed'))",
           ".validate": "newData.hasChildren(['uid','clientID','name']) && newData.child('name').isString() && newData.child('name').val().length <= 20 && newData.child('clientID').isString() && newData.child('clientID').val().length <= 20"
         },
         "start": {
-          ".write": "auth != null && auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() && !data.exists() && root.child('rooms').child($room).child('guest/uid').exists()",
+          ".write": "auth != null && auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() && !data.exists() && root.child('rooms').child($room).child('guest/uid').val() !== 'closed' && root.child('rooms').child($room).child('guest/uid').exists()",
           ".validate": "newData.isString() && newData.val().length < 20000"
         },
         "turns": {
@@ -62,16 +62,6 @@
               ".write": "auth != null && auth.uid === $uid && (root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid || root.child('rooms').child($room).child('guest/uid').val() === auth.uid)",
               ".validate": "newData.isNumber()"
             }
-          }
-        },
-        "startingAt": {
-          ".write": "auth != null && auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() && !data.exists()",
-          ".validate": "newData.isNumber() && newData.val() >= now && newData.val() <= now + 10000"
-        },
-        "chat": {
-          "$message": {
-            ".write": "auth != null && !data.exists() && (auth.uid === root.child('rooms').child($room).child('meta/host/uid').val() || auth.uid === root.child('rooms').child($room).child('guest/uid').val()) && newData.child('uid').val() === auth.uid",
-            ".validate": "newData.hasChildren(['uid','name','text']) && newData.child('name').isString() && newData.child('name').val() === root.child('profiles').child(auth.uid).child('displayName').val() && newData.child('text').isString() && newData.child('text').val().length > 0 && newData.child('text').val().length <= 300"
           }
         }
       }
@@ -114,7 +104,7 @@
     },
     "servers": {
       "$version": {
-        ".read": true,
+        ".read": "auth != null",
         "$room": {
           ".write": "auth != null && root.child('rooms').child($room).child('meta/host/uid').val() === auth.uid",
           ".validate": "newData.hasChildren(['name','hostName','createdAt']) && root.child('rooms').child($room).child('meta/visibility').val() === 'public' && !root.child('rooms').child($room).child('guest').exists() && newData.child('name').isString() && newData.child('name').val().length <= 40 && newData.child('hostName').isString() && newData.child('hostName').val() === root.child('profiles').child(auth.uid).child('displayName').val() && newData.child('createdAt').isNumber() && newData.child('createdAt').val() === root.child('rooms').child($room).child('meta/createdAt').val()"
