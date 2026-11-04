@@ -15,6 +15,7 @@ import "./FriendsFieldGuide";
 import "./FriendsWorldStatus";
 import "./friends-command.css";
 import "./friends-arcade.css";
+import "./friends-lobby.css";
 
 @customElement("friends-welcome")
 export class FriendsWelcome extends LitElement {
@@ -143,7 +144,7 @@ export class FriendsWelcome extends LitElement {
       aria-label="OpenFront command center"
     >
       <div class="command-topline">
-        <span class="command-status"><i></i> OPENFRONT / COMMAND CENTER</span>
+        <span class="command-status"><i></i> AG / OPENFRONT</span>
         <button
           class="command-audio"
           @click=${this.toggleSound}
@@ -155,10 +156,10 @@ export class FriendsWelcome extends LitElement {
       </div>
       <div class="command-hero">
         <div class="command-copy">
-          <span class="command-kicker">CONQUER THE REAL WORLD</span>
-          <h1>OPENFRONT<span> FRIENDS</span></h1>
+          <span class="command-kicker">FRIENDS EDITION</span>
+          <h1>OpenFront<span>Build your nation.</span></h1>
           <p>
-            Welcome, Commander. Choose your challenge and make the world yours.
+            Choose a solo game or find a server.
           </p>
           <div class="command-actions">
             ${this.savedAt ? html`<button class="command-secondary" @click=${this.resume}>Continue saved world</button>` : html``}
@@ -172,20 +173,14 @@ export class FriendsWelcome extends LitElement {
             ${hosted ? html`<button class="command-secondary" @click=${this.online}>Multiplayer ${commandIcon("arrow")}</button>` : html`<button class="command-secondary" @click=${() => this.open("host-lobby-modal")}>Host match</button><button class="command-secondary" @click=${() => this.open("join-lobby-modal")}>Join friends</button>`}
           </div>
         </div>
-        <div class="command-globe" aria-hidden="true">
-          <div class="command-orbit"></div>
-          <div class="command-sphere">${commandIcon("globe")}</div>
-          <span class="command-coord">40.7° N / 74.0° W</span
-          ><span class="command-maplabel">GLOBAL OPERATIONS</span>
-        </div>
       </div>
       <div class="command-sectionhead">
         <div>
-          <span class="command-kicker">YOUR NEXT CAMPAIGN</span>
-          <h2>Choose your challenge</h2>
+          <span class="command-kicker">SOLO</span>
+          <h2>Difficulty</h2>
         </div>
         <span class="command-difficulty-note"
-          >Real AI difficulty · Saved for next time</span
+          >Your selection is saved</span
         >
       </div>
       <div
@@ -214,31 +209,10 @@ export class FriendsWelcome extends LitElement {
             </button>`,
         )}
       </div>
-      <div class="command-features">
-        ${[
-          ["city", "BUILD YOUR ECONOMY", "Cities & factories"],
-          ["shield", "HOLD THE LINE", "Defenses & diplomacy"],
-          ["port", "RULE THE SEAS", "Ports & warships"],
-        ].map(
-          ([icon, title, copy]) =>
-            html`<div>
-              ${commandIcon(icon)}<span
-                ><strong>${title}</strong><small>${copy}</small></span
-              >
-            </div>`,
-        )}
-      </div>
       <p class="command-save-note">
-        ${this.saveError ? "Saving is unavailable. Check that this browser allows site storage." : "World progress autosaves every 10 seconds on this device."}
-        ${this.savedAt ? `Last saved ${new Date(this.savedAt).toLocaleString()}` : "Your first save appears after starting a world."}
+        ${this.saveError ? "Saving is unavailable. Check that this browser allows site storage." : "Autosaved on this device."}
+        ${this.savedAt ? `Last saved ${new Date(this.savedAt).toLocaleString()}` : ""}
       </p>
-      <div class="command-footer">
-        <button class="command-soundtest" @click=${this.testSound}>
-          ${commandIcon("sound")} Test launch sound</button
-        ><span
-          >${hosted ? "Online matchmaking · Google or email sign-in · Normal AI fallback" : "Private multiplayer ready · Invite friends using your LAN address"}</span
-        >
-      </div>
       <div class="command-credits">
         © OpenFront and Contributors · Independent fork ·
         <a href="https://github.com/AGames21/openfront-friends"
