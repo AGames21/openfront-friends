@@ -1,0 +1,56 @@
+import { limitToLast, onChildAdded, push, query, ref } from "firebase/database";
+import { friendsDB } from "./FriendsFirebase";
+import type { FriendsSession } from "./FriendsRelay";
+
+export const ROOM_CHAT_TYPE = "friends_room_chat";
+export interface RoomChatSession {
+  session: FriendsSession;
+  names: Record<string, string>;
+}
+export function readRoomChat(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  try {
+    const packet = JSON.parse(value);
+    return packet?.type === "toggle_pause" &&
+      packet.channel === ROOM_CHAT_TYPE &&
+      typeof packet.text === "string" &&
+      packet.text.trim().length > 0 &&
+      packet.text.length <= 300
+      ? packet.text
+      : null;
+  } catch {
+    return null;
+  }
+}
+/** Use the existing ignored control envelope so even older hosts never simulate chat.
+ * Chat shares the existing member-only message channel; it never enters simulation turns. */
+export function connectRoomChat(
+  room: RoomChatSession,
+  receive: (name: string, text: string) => void,
+  error: () => void,
+) {
+  const { session, names } = room;
+  const path = (uid: string) =>
+    ref(friendsDB, `rooms/${session.roomID}/inputs/${uid}`);
+  const off = [session.hostUID, session.guestUID].map((uid) =>
+    onChildAdded(
+      query(path(uid), limitToLast(100)),
+      (snapshot) => {
+        const text = readRoomChat(snapshot.val());
+        if (text !== null) receive(names[uid] ?? "Commander", text);
+      },
+      error,
+    ),
+  );
+  return {
+    close: () => off.forEach((unsubscribe) => unsubscribe()),
+    send: async (text: string) => {
+      text = text.trim();
+      if (!text || text.length > 300) throw new Error("Use 1–300 characters.");
+      await push(
+        path(session.uid),
+        JSON.stringify({ type: "toggle_pause", channel: ROOM_CHAT_TYPE, text }),
+      );
+    },
+  };
+}

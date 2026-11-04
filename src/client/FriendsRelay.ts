@@ -49,6 +49,17 @@ export class FriendsRelay {
   }
   start() {
     const s = this.session;
+    document.dispatchEvent(
+      new CustomEvent("friends-chat-session", {
+        detail: {
+          session: s,
+          names: {
+            [s.hostUID]: this.config.gameStartInfo!.players[0].username,
+            [s.guestUID]: this.config.gameStartInfo!.players[1].username,
+          },
+        },
+      }),
+    );
     void onDisconnect(this.path("closed")).set(true);
     this.connect();
     this.message({
@@ -207,6 +218,9 @@ export class FriendsRelay {
   private continueAlone() {
     if (this.stopped || this.continuingAlone) return;
     this.continuingAlone = true;
+    document.dispatchEvent(
+      new CustomEvent("friends-chat-session", { detail: null }),
+    );
     this.off.splice(0).forEach((f) => f());
     this.intents = [
       {
@@ -227,6 +241,9 @@ export class FriendsRelay {
   }
   private fail(message: string) {
     if (this.stopped || this.continuingAlone) return;
+    document.dispatchEvent(
+      new CustomEvent("friends-chat-session", { detail: null }),
+    );
     this.stopped = true;
     clearInterval(this.timer);
     this.off.splice(0).forEach((f) => f());
@@ -237,6 +254,9 @@ export class FriendsRelay {
   endGame() {
     if (!this.stopped && !this.continuingAlone)
       void set(this.path("closed"), true).catch(() => {});
+    document.dispatchEvent(
+      new CustomEvent("friends-chat-session", { detail: null }),
+    );
     this.stopped = true;
     clearInterval(this.timer);
     this.off.splice(0).forEach((f) => f());

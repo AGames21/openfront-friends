@@ -243,6 +243,13 @@ export class EventsDisplay extends LitElement implements Controller {
   }
 
   private addEvent(event: GameEvent) {
+    const description = event.unsafeDescription
+      ? new DOMParser().parseFromString(event.description, "text/html").body
+          .textContent
+      : event.description;
+    document.dispatchEvent(
+      new CustomEvent("friends-game-notice", { detail: description ?? "" }),
+    );
     this.events = [...this.events, event];
     this.requestUpdate();
   }

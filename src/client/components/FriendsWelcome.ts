@@ -12,6 +12,7 @@ import { playCue } from "../sound/CuePlayer";
 import { UserSettings } from "../UserSettings";
 import { commandIcon } from "./FriendsIcons";
 import "./FriendsFieldGuide";
+import "./FriendsChat";
 import "./FriendsWorldStatus";
 import "./friends-command.css";
 import "./friends-arcade.css";
@@ -53,6 +54,8 @@ export class FriendsWelcome extends LitElement {
       });
       document.body.appendChild(back);
     }
+    if (!document.querySelector("friends-chat"))
+      document.body.appendChild(document.createElement("friends-chat"));
     this.muted = this.settings.audioVolume("master") === 0;
     void import("../FriendsSaves")
       .then(async (saves) => {
