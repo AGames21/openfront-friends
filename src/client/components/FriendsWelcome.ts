@@ -45,7 +45,7 @@ export class FriendsWelcome extends LitElement {
     if (!document.querySelector(".arcade-return")) {
       const back = document.createElement("a");
       back.className = "arcade-return";
-      back.href = "https://agames21.github.io/#games";
+      back.href = "https://agamer21.github.io/#games";
       back.textContent = "← AG Arcade";
       back.setAttribute("aria-label", "Back to AG Arcade");
       back.addEventListener("click", async (e) => {
