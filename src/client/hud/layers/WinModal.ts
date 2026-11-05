@@ -1,3 +1,5 @@
+import { matchResultRows } from "../../FriendsMatchResults";
+import "../../components/friends-tactics.css";
 import { GameType, RankedType } from "@openfront/engine-api/game/GameTypes";
 import { GameUpdateType } from "@openfront/engine-api/game/GameUpdates";
 import type { AllPlayersStats, Winner } from "@openfront/engine-api/Schemas";
@@ -176,6 +178,11 @@ export class WinModal extends LitElement implements Controller {
   private rand = Math.random();
 
   // Override to prevent shadow DOM creation
+  private renderFriendsResults() {
+    if(process.env.FRIENDS_STATIC!=="true"||!this.gameEnd||!this.game)return null;
+    const rows=matchResultRows(this.gameEnd.allPlayersStats,this.game.players().filter(p=>p.clientID()!==null).map(p=>({clientID:p.clientID()!,name:p.displayName(),tiles:p.numTilesOwned()})));
+    return html`<details class="friends-match-results" open><summary>Match results</summary><p>Match standout: <strong>${rows[0]?.name??"—"}</strong></p><div><table><thead><tr><th>Nation</th><th>Peak territory</th><th>Human eliminations</th><th>Units destroyed</th><th>Aircraft lost</th></tr></thead><tbody>${rows.map(row=>html`<tr><td>${row.name}</td><td>${row.peak.toLocaleString()}</td><td>${row.kills}</td><td>${row.destroyed}</td><td>${row.aircraftLost}</td></tr>`)}</tbody></table></div><small>Standout score = peak territory + 1,000 per human eliminated + 100 per unit destroyed.</small></details>`;
+  }
   createRenderRoot() {
     return this;
   }
@@ -206,6 +213,7 @@ export class WinModal extends LitElement implements Controller {
             @xp-legend=${this.onXpLegend}
           ></game-xp-panel>
           ${this.innerHtml()}
+          ${this.renderFriendsResults()}
         </div>
         <!-- Leaving is the quieter action, on the left; staying in the game
              is the main one, on the right. Sharing a milestone sits between

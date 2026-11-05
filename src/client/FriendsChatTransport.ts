@@ -7,6 +7,9 @@ export interface RoomChatSession {
   session: FriendsSession;
   names: Record<string, string>;
 }
+let activeRoomChat:RoomChatSession|null=null;
+export const getRoomChatSession=()=>activeRoomChat;
+export function setRoomChatSession(room:RoomChatSession|null){activeRoomChat=room;}
 export function readRoomChat(value: unknown): string | null {
   if (typeof value !== "string") return null;
   try {
@@ -28,8 +31,13 @@ export function connectRoomChat(
   room: RoomChatSession,
   receive: (name: string, text: string) => void,
   error: () => void,
+  signal?: (name: string, text: string, uid: string) => void,
 ) {
   const { session, names } = room;
+  const deliver = (name: string, text: string, uid: string) => {
+    if (text.startsWith("AGPING:") && signal) signal(name, text, uid);
+    else receive(name, text);
+  };
   const path = (uid: string) =>
     ref(friendsDB, `rooms/${session.roomID}/inputs/${uid}`);
   const off = (
@@ -47,13 +55,17 @@ export function connectRoomChat(
               packet.text.length <= 300 &&
               session.party.members.some((member) => member.uid === packet.uid)
             )
-              receive(names[packet.uid] ?? "Commander", packet.text);
+              deliver(
+                names[packet.uid] ?? "Commander",
+                packet.text,
+                packet.uid,
+              );
           } catch {
             /* Not chat. */
           }
         } else {
           const text = readRoomChat(snapshot.val());
-          if (text !== null) receive(names[uid] ?? "Commander", text);
+          if (text !== null) deliver(names[uid] ?? "Commander", text, uid);
         }
       },
       error,

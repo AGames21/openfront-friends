@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { connectRoomChat, type RoomChatSession } from "../FriendsChatTransport";
+import { connectRoomChat, setRoomChatSession, type RoomChatSession } from "../FriendsChatTransport";
 
 @customElement("friends-chat")
 export class FriendsChat extends LitElement {
@@ -127,6 +127,7 @@ export class FriendsChat extends LitElement {
     this.canChat = false;
     this.draft = "";
     const room = (event as CustomEvent<RoomChatSession | null>).detail;
+    setRoomChatSession(room);
     if (room) {
       this.lines = [];
       this.unread = 0;
@@ -141,6 +142,12 @@ export class FriendsChat extends LitElement {
             true,
           );
         },
+        (name, text, uid) =>
+          document.dispatchEvent(
+            new CustomEvent("friends-map-ping", {
+              detail: { name, text, uid },
+            }),
+          ),
       );
       this.canChat = true;
       this.collapsed = false;
@@ -154,9 +161,23 @@ export class FriendsChat extends LitElement {
       new CustomEvent("friends-chat-session", { detail: null }),
     );
   };
+  private sendTool = (e: Event) => {
+    const detail = (
+      e as CustomEvent<{ text: string; complete?: (ok: boolean) => void }>
+    ).detail;
+    if (!this.canChat || !this.connection) {
+      detail.complete?.(false);
+      return;
+    }
+    void this.connection
+      .send(detail.text)
+      .then(() => detail.complete?.(true))
+      .catch(() => detail.complete?.(false));
+  };
   connectedCallback() {
     super.connectedCallback();
     document.addEventListener("friends-chat-session", this.changeSession);
+    document.addEventListener("friends-chat-send-tool", this.sendTool);
     document.addEventListener("join-lobby", this.reset);
     for (const event of [
       "friends-online-notice",
@@ -169,6 +190,7 @@ export class FriendsChat extends LitElement {
     super.disconnectedCallback();
     this.connection?.close();
     document.removeEventListener("friends-chat-session", this.changeSession);
+    document.removeEventListener("friends-chat-send-tool", this.sendTool);
     document.removeEventListener("join-lobby", this.reset);
     for (const event of [
       "friends-online-notice",

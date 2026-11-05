@@ -1,5 +1,6 @@
 import {
   Difficulty,
+  UnitType,
   HumansVsNations,
   GameMapSize,
   GameMapType,
@@ -8,6 +9,7 @@ import {
 } from "@openfront/engine-api/game/GameTypes";
 import type { WireGameStartInfo } from "@openfront/shared/WireSchemas";
 import type { FriendsSession } from "./FriendsRelay";
+import { roomSettings, type FriendsRoomSettings } from "./FriendsRoomSettings";
 
 export const PARTY_VERSION = "friends-party-v2-content";
 export const PARTY_MAPS = [
@@ -51,8 +53,10 @@ export function partyStart(
   members: PartyMember[],
   map: GameMapType,
   activity: "standard" | "survival" | "capture" = "standard",
+  options?: FriendsRoomSettings,
 ): WireGameStartInfo {
   const teams = members.length === 4;
+  const settings = roomSettings(options);
   return {
     gameID,
     lobbyCreatedAt: Date.now(),
@@ -63,7 +67,7 @@ export function partyStart(
       ...(teams ? { teamIndex: index < 2 ? 0 : 1 } : {}),
     })),
     config: {
-      friendsAircraft: true,
+      friendsAircraft: settings.aircraft,
       ...(activity !== "standard"
         ? {
             friendsMode: activity,
@@ -71,7 +75,7 @@ export function partyStart(
             startingGold: 500000,
           }
         : {}),
-      gameMap: map,
+      gameMap: settings.map === "vote" ? map : settings.map,
       gameMapSize: GameMapSize.Compact,
       gameType: GameType.Private,
       gameMode: activity === "survival" || teams ? GameMode.Team : GameMode.FFA,
@@ -80,9 +84,10 @@ export function partyStart(
         : teams
           ? { playerTeams: 2 }
           : {}),
-      difficulty: Difficulty.Medium,
-      donateGold: teams || activity === "survival",
-      donateTroops: teams || activity === "survival",
+      difficulty: settings.difficulty,
+      startingGold: settings.startingGold,
+      donateGold: true,
+      donateTroops: true,
       bots: activity === "standard" ? 100 : 25,
       nations: "default",
       spawnImmunityDuration: activity === "standard" ? 3000 : 0,
@@ -90,7 +95,12 @@ export function partyStart(
       infiniteTroops: false,
       instantBuild: false,
       randomSpawn: false,
-      disabledUnits: [],
+      disabledUnits: [
+        ...(!settings.nukes
+          ? [UnitType.AtomBomb, UnitType.HydrogenBomb, UnitType.MIRV]
+          : []),
+        ...(!settings.aircraft ? [UnitType.Airfield, UnitType.Aircraft] : []),
+      ],
       maxPlayers: members.length,
     },
   };

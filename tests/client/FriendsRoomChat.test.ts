@@ -40,6 +40,8 @@ beforeEach(() => {
 });
 afterEach(() => document.body.replaceChildren());
 describe("room chat on the existing member-only channel", () => {
+  it("delivers map signals with the authenticated sender identity",async()=>{const receive=vi.fn(),signal=vi.fn();const connection=connectRoomChat(room(),receive,vi.fn(),signal);await connection.send('AGPING:{"kind":"attack","tile":10,"at":100}');expect(receive).not.toHaveBeenCalled();expect(signal).toHaveBeenCalledWith("Host player",expect.stringContaining("AGPING:"),"host");connection.close();});
+
   it("delivers both players' messages without accepting spoofed names or game commands", async () => {
     const hostMessages = vi.fn(),
       guestMessages = vi.fn();

@@ -1,3 +1,4 @@
+import { FriendsTactics } from "../controllers/FriendsTactics";
 import { EventBus } from "@openfront/shared/EventBus";
 import { Controller } from "../Controller";
 import { AmbienceController } from "../controllers/AmbienceController";
@@ -335,6 +336,7 @@ export function createRenderer(
 
   const layers: Controller[] = [
     new FriendsContentOverlay(game, transformHandler, view),
+    new FriendsTactics(game, transformHandler, eventBus),
     new WarshipSelectionController(game, eventBus, transformHandler, view),
     new BuildPreviewController(
       game,

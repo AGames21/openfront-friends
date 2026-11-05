@@ -1,0 +1,153 @@
+.ft-panel {
+  position: fixed;
+  right: 14px;
+  bottom: 190px;
+  z-index: 800;
+  width: min(285px, calc(100vw - 28px));
+  background: #151c24ed;
+  color: #fff;
+  border: 1px solid #66738177;
+  border-radius: 10px;
+  font: 12px system-ui;
+  box-shadow: 0 8px 30px #0005;
+}
+.ft-panel summary {
+  padding: 13px;
+  cursor: pointer;
+  font-weight: 750;
+}
+.ft-body {
+  padding: 0 13px 13px;
+  max-height: 55dvh;
+  overflow: auto;
+}
+.ft-body label {
+  display: block;
+  font-size: 11px;
+}
+.ft-body select {
+  width: 100%;
+  margin: 7px 0;
+  background: #293544;
+  color: #fff;
+  padding: 8px;
+  border: 1px solid #667381;
+  border-radius: 6px;
+}
+.ft-body button {
+  background: #2a394a;
+  color: #fff;
+  border: 1px solid #5e7186;
+  border-radius: 6px;
+  padding: 8px;
+  font: 600 11px system-ui;
+  cursor: pointer;
+}
+.ft-ping-buttons,
+.ft-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ft-body small {
+  display: block;
+  color: #c3cdd9;
+  font-size: 10px;
+  line-height: 1.5;
+  margin-top: 10px;
+}
+.ft-status {
+  color: #f4da9d;
+  min-height: 16px;
+  line-height: 1.4;
+}
+.ft-pings {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+}
+.ft-map-ping {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 7px 10px;
+  border: 2px solid #f8d081;
+  border-radius: 20px;
+  background: #162333ed;
+  color: #fff;
+  white-space: nowrap;
+  font: 700 12px system-ui;
+  box-shadow: 0 0 0 7px #f8d08130;
+}
+.ft-map-ping[data-kind="attack"] {
+  border-color: #ff8181;
+}
+.ft-map-ping[data-kind="defend"] {
+  border-color: #86b7ff;
+}
+.friends-room-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  border: 1px solid #ffffff30;
+  padding: 13px;
+  border-radius: 9px;
+  margin: 15px 0;
+}
+.friends-room-settings label {
+  display: block;
+  font-size: 12px;
+}
+.friends-room-settings select {
+  display: block;
+  max-width: 100%;
+  background: #253243;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #617085;
+}
+.friends-room-settings input {
+  width: auto;
+}
+.friends-match-results {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #ffffff30;
+  border-radius: 10px;
+  color: white;
+  font: 12px system-ui;
+}
+.friends-match-results table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.friends-match-results th,
+.friends-match-results td {
+  text-align: left;
+  padding: 7px;
+  border-bottom: 1px solid #fff2;
+}
+.friends-match-results small {
+  color: #c8d2de;
+}
+.friends-match-results > div {
+  overflow: auto;
+}
+@media (max-height: 550px) {
+  .ft-panel {
+    bottom: 105px;
+  }
+  .ft-body {
+    max-height: 45dvh;
+  }
+}
+@media (max-width: 600px) {
+  .ft-panel {
+    bottom: 240px;
+    width: 235px;
+  }
+  .ft-body {
+    max-height: 38dvh;
+  }
+}

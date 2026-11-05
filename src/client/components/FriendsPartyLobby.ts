@@ -1,3 +1,4 @@
+import { Difficulty } from "@openfront/engine-api/game/GameTypes";
 import type { GameMapType } from "@openfront/engine-api/game/GameTypes";
 import { generateID } from "@openfront/shared/SharedUtil";
 import type { WireGameStartInfo } from "@openfront/shared/WireSchemas";
@@ -30,6 +31,7 @@ import {
   type PartyMember,
 } from "../FriendsParty";
 import type { FriendsSession } from "../FriendsRelay";
+import { roomSettings, type FriendsRoomSettings } from "../FriendsRoomSettings";
 import "./friends-party.css";
 
 @customElement("friends-party-lobby")
@@ -38,6 +40,7 @@ export class FriendsPartyLobby extends LitElement {
   @property() displayName = "";
   @property() activity: "standard" | "survival" | "capture" = "standard";
   @state() private code = "";
+  @state() private settings = roomSettings(null);
   @state() private count = 4;
   @state() private members: PartyMember[] = [];
   @state() private votes: Record<string, string> = {};
@@ -109,6 +112,7 @@ export class FriendsPartyLobby extends LitElement {
             named: true,
             name: `${me.name}'s ${this.activity === "survival" ? "co-op" : this.count === 4 ? "2v2" : "1v1"} room`,
             partyCount: this.count,
+            settings: this.settings,
             partyActivity: this.activity,
             roomIDs: ids,
           },
@@ -282,6 +286,7 @@ export class FriendsPartyLobby extends LitElement {
         this.hostUID = meta.host.uid;
         this.count = meta.partyCount;
         this.activity = meta.partyActivity ?? "standard";
+        this.settings = roomSettings(meta.settings);
         this.started = false;
         this.off.push(
           onChildAdded(this.path(`inputs/${this.hostUID}`), (snapshot) => {
@@ -359,6 +364,7 @@ export class FriendsPartyLobby extends LitElement {
         this.members,
         choosePartyMap(this.votes, this.members),
         this.activity,
+        this.settings,
       );
       const paths = Object.fromEntries(
         this.roomIDs.map((room) => [
@@ -465,12 +471,58 @@ export class FriendsPartyLobby extends LitElement {
     this.voteListeners.clear();
     if (clearStatus) this.status = "Left the room.";
   }
+  private renderSettings() {
+    const change = (key: keyof FriendsRoomSettings, value: unknown) =>
+      (this.settings = roomSettings({ ...this.settings, [key]: value }));
+    return html`<fieldset class="friends-room-settings">
+      <legend>Host settings</legend>
+      <label
+        >Map<select
+          .value=${this.settings.map}
+          aria-label="Room map"
+          @change=${(e: Event) => change("map", (e.target as HTMLSelectElement).value)}
+        >
+          <option value="vote">Player vote</option>
+          ${PARTY_MAPS.map((map) => html`<option value=${map}>${map}</option>`)}
+        </select></label
+      ><label
+        >AI difficulty<select
+          .value=${this.settings.difficulty}
+          aria-label="Room AI difficulty"
+          @change=${(e: Event) => change("difficulty", (e.target as HTMLSelectElement).value)}
+        >
+          ${Object.values(Difficulty).map((d) => html`<option value=${d} ?selected=${d === this.settings.difficulty}>${d}</option>`)}
+        </select></label
+      ><label
+        >Starting gold<select
+          .value=${String(this.settings.startingGold)}
+          aria-label="Room starting gold"
+          @change=${(e: Event) => change("startingGold", Number((e.target as HTMLSelectElement).value))}
+        >
+          ${[50000, 500000, 2000000].map((n) => html`<option value=${n}>${n.toLocaleString()}</option>`)}
+        </select></label
+      ><label
+        ><input
+          type="checkbox"
+          .checked=${this.settings.aircraft}
+          @change=${(e: Event) => change("aircraft", (e.target as HTMLInputElement).checked)}
+        />Aircraft</label
+      ><label
+        ><input
+          type="checkbox"
+          .checked=${this.settings.nukes}
+          @change=${(e: Event) => change("nukes", (e.target as HTMLInputElement).checked)}
+        />Nuclear weapons</label
+      >
+    </fieldset>`;
+  }
   render() {
     const disabled = this.busy || !this.uid || !this.displayName;
     return html`<section class="friends-party">
       <h3>Play with friends</h3>
       <p>Reconnectable rooms · map voting · 1v1 or 2v2</p>
       ${readPartyResume(this.uid) ? html`<button @click=${this.rejoin} ?disabled=${this.busy}>Rejoin last match</button><small>Same account and browser. Replays your match; larger worlds can take longer to catch up. Everyone waits if the host disconnects.</small>` : html``}
+      ${this.code ? html`<p>Settings: ${this.settings.map} · ${this.settings.difficulty} AI · ${this.settings.startingGold.toLocaleString()} gold · aircraft ${this.settings.aircraft ? "on" : "off"} · nukes ${this.settings.nukes ? "on" : "off"}</p>` : this.renderSettings()}
       ${
         this.code
           ? html`<div class="party-code">

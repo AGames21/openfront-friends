@@ -1737,6 +1737,23 @@ function showErrorModal(
   // Add to modal
   modal.appendChild(pre);
   modal.appendChild(button);
+  if (process.env.FRIENDS_STATIC === "true") {
+    const recovery = document.createElement("section");
+    recovery.style.cssText="padding:16px;border-top:1px solid #888;margin-top:14px;color:inherit";
+    modal.appendChild(recovery);
+    void import("./FriendsSaves").then(async saves => {
+      for (const previous of [false,true]) {
+        const save=await saves.readCampaign(previous); if(!save) continue;
+        const resume=document.createElement("button");
+        resume.className="copy-btn";
+        resume.textContent=`${previous?"Try previous checkpoint":"Resume last safe save"} — ${new Date(save.savedAt).toLocaleTimeString()}`;
+        resume.onclick=async()=>{resume.disabled=true;try{await saves.resumeCampaign(previous);modal.remove()}catch{resume.disabled=false;resume.textContent="Could not restore this checkpoint. Try the other save."}};
+        recovery.appendChild(resume);
+      }
+      const help=document.createElement("p");help.textContent="Recovery continues the saved world locally. Use Multiplayer → Rejoin for a shared room.";recovery.appendChild(help);
+    }).catch(()=>{recovery.textContent="Saved-world recovery is unavailable in this browser."});
+  }
+
   if (closable) {
     const closeButton = document.createElement("button");
     closeButton.textContent = "X";

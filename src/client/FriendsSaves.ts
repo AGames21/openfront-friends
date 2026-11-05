@@ -26,8 +26,10 @@ async function ownerKey() {
   await friendsAuth.authStateReady();
   return friendsAuth.currentUser?.uid ?? "guest";
 }
-export async function readCampaign(): Promise<CampaignSave | undefined> {
-  const key = await ownerKey(),
+export async function readCampaign(
+  previous = false,
+): Promise<CampaignSave | undefined> {
+  const key = (await ownerKey()) + (previous ? ":previous" : ""),
     db = await database();
   try {
     return await new Promise((resolve, reject) => {
@@ -39,8 +41,8 @@ export async function readCampaign(): Promise<CampaignSave | undefined> {
     db.close();
   }
 }
-export async function resumeCampaign() {
-  const saved = await readCampaign();
+export async function resumeCampaign(previous = false) {
+  const saved = await readCampaign(previous);
   if (!saved) return;
   const start = {
     ...saved.start,
@@ -96,7 +98,13 @@ export function startCampaignAutosave(
       try {
         await new Promise<void>((resolve, reject) => {
           const tx = db.transaction("campaigns", "readwrite");
-          tx.objectStore("campaigns").put(value);
+          const store = tx.objectStore("campaigns"),
+            old = store.get(key);
+          old.onsuccess = () => {
+            if (old.result)
+              store.put({ ...old.result, key: key + ":previous" });
+            store.put(value);
+          };
           tx.oncomplete = () => resolve();
           tx.onerror = () => reject(tx.error);
           tx.onabort = () => reject(tx.error);
