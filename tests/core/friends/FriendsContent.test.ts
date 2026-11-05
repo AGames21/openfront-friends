@@ -149,6 +149,20 @@ describe("mission rules on the real simulation", () => {
   });
 });
 describe("airfields and aircraft", () => {
+  test.each([true, false])("destroyed airfield cleans up safely when aircraft already removed: %s", async (alreadyRemoved) => {
+    const { game, human, enemy } = await scene();
+    const field = human.buildUnit(UnitType.Airfield, human.spawnTile()!, {});
+    game.addExecution(new AirfieldExecution(field));
+    executeTicks(game, 3);
+    const plane = human.units(UnitType.Aircraft)[0];
+    expect(plane).toBeDefined();
+    if (alreadyRemoved) plane.delete(true, enemy);
+    field.delete(true, enemy);
+    expect(() => executeTicks(game, 3)).not.toThrow();
+    expect(plane.isActive()).toBe(false);
+    expect(human.units(UnitType.Aircraft)).toHaveLength(0);
+  });
+
   test("construction creates an airfield which launches sorties and damages an enemy army", async () => {
     const { game, human, enemy } = await scene();
     game.addExecution(

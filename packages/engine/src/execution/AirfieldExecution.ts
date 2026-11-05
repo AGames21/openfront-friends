@@ -24,7 +24,9 @@ export class AirfieldExecution implements Execution {
   }
   tick(ticks: number) {
     if (!this.field.isActive()) {
-      this.plane?.delete(false);
+      // Interception/elimination can remove the sortie before its airfield.
+      if (this.plane?.isActive()) this.plane.delete(false);
+      this.plane = null;
       this.active = false;
       return;
     }

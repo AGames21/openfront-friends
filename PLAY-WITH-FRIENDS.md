@@ -95,3 +95,7 @@ Mission counters, aircraft sorties and objectives are saved in snapshots and
 replayed deterministically in room matches. Existing saved worlds keep their
 original rules. Older active online-room histories use a different version;
 start a fresh room after this update so everyone runs the same simulation.
+
+## Aircraft cleanup fix - 2026-11-05
+
+Fixed a crash when an already-destroyed aircraft was cleaned up after losing its airfield. Cleanup now checks whether the aircraft is active and clears the cached reference. Regression tests cover both removed and still-active aircraft during airfield destruction; the 15 mission/aircraft tests pass. Refresh all participating clients after deployment to load the corrected simulation worker.
